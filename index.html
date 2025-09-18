@@ -1,0 +1,3537 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cari NIP</title>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+        // Show loading screen immediately
+        document.addEventListener('DOMContentLoaded', function() {
+            // The loading screen is already visible via CSS (body.loading class)
+            // This ensures it stays visible during script loading
+        });
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #searchBox {
+            margin-bottom: 15px;
+        }
+
+        #result {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            max-width: 100%;
+            width: 100%;
+        }
+
+        .field {
+            margin: 8px 0;
+            padding: 6px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+        }
+
+        .label {
+            font-weight: bold;
+            color: #444;
+            width: 30%;
+        }
+
+        .value {
+            width: 70%;
+            color: #000;
+            padding-left: 2px;
+        }
+
+        .lihat-link {
+            color: blue;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        /* POPUP */
+        .popup-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+        }
+
+        .popup {
+            display: none;
+            position: fixed;
+            top: 50%;
+            right: 20px;
+            transform: translateY(-50%);
+            background: #fff;
+            width: 800px;
+            max-width: 90vw;
+            max-height: 90vh;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1001;
+            overflow: hidden;
+        }
+
+        .popup-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 10px 14px;
+            border-bottom: 1px solid #eee;
+            background: #f8f8f8;
+            cursor: move;
+            user-select: none;
+        }
+
+        .popup-title {
+            font-weight: bold;
+            color: #333;
+            font-size: 14px;
+        }
+
+        .popup-close {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 2px 6px;
+            border-radius: 6px;
+        }
+
+        .popup-close:hover {
+            background: #eaeaea;
+        }
+
+        .popup-body {
+            padding: 0;
+        }
+
+        .popup-body iframe {
+            display: block;
+            width: 100%;
+            height: 80vh;
+            border: 0;
+        }
+
+        @media (max-width: 640px) {
+            .popup {
+                right: 10px;
+                width: 95vw;
+            }
+
+            .popup-body iframe {
+                height: 70vh;
+            }
+        }
+
+        .actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin: 12px 0;
+            flex-wrap: wrap;
+        }
+
+        .actions .primary,
+        .actions .secondary {
+            border: none;
+            border-radius: 6px;
+            padding: 12px 12px;
+            color: #fff;
+            cursor: pointer;
+            font-size: 0.95rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .actions .primary {
+            background-color: #2563eb;
+        }
+
+        .actions .secondary {
+            background-color: #6b7280;
+        }
+
+        .actions button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Loading button styles */
+        .btn-loading {
+            background-color: #4f46e5 !important;
+        }
+
+        .btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: button-loading-spinner 1s ease infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        @keyframes button-loading-spinner {
+            from {
+                transform: translate(-50%, -50%) rotate(0turn);
+            }
+
+            to {
+                transform: translate(-50%, -50%) rotate(1turn);
+            }
+        }
+
+        .status-message {
+            font-size: 0.9rem;
+            margin-left: auto;
+            color: #6b7280;
+        }
+
+        .status-message.success {
+            color: #16a34a;
+        }
+
+        .status-message.error {
+            color: #dc2626;
+        }
+
+        .prefill-link {
+            margin-top: 10px;
+        }
+
+        .prefill-link a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .prefill-link a:hover {
+            text-decoration: underline;
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 6px 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        /* Preview Modal */
+        .preview-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1200;
+        }
+
+        .preview-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            width: 480px;
+            max-width: 90vw;
+            max-height: 85vh;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            z-index: 1201;
+            overflow: hidden;
+        }
+
+        .preview-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .preview-modal__title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .preview-modal__close {
+            border: none;
+            background: transparent;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .preview-modal__close:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .preview-modal__body {
+            padding: 20px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .preview-modal__body p {
+            margin: 0 0 16px;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+
+        .preview-changes {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .preview-change-item {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: #f9fafb;
+            border-radius: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .preview-change-item__label {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 6px;
+            font-size: 0.9rem;
+        }
+
+        .preview-change-item__values {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+        }
+
+        .preview-change-item__from {
+            color: #dc2626;
+            background: #fef2f2;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #fecaca;
+        }
+
+        .preview-change-item__arrow {
+            color: #6b7280;
+            font-weight: bold;
+        }
+
+        .preview-change-item__to {
+            color: #059669;
+            background: #f0fdf4;
+            padding: 4px 8px;
+            border-radius: 4px;
+            border: 1px solid #bbf7d0;
+        }
+
+        .preview-modal__footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .preview-modal__action {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .preview-modal__action--cancel {
+            background: #6b7280;
+            color: #fff;
+        }
+
+        .preview-modal__action--cancel:hover {
+            background: #4b5563;
+        }
+
+        .preview-modal__action--confirm {
+            background: #2563eb;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-modal__action--confirm:hover {
+            background: #1d4ed8;
+        }
+
+        .preview-modal__action--confirm:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Notification styles */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            padding: 16px 20px;
+            min-width: 300px;
+            max-width: 400px;
+            z-index: 2000;
+            transform: translateX(100%);
+            transition: transform 0.3s ease-in-out;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left-color: #10b981;
+        }
+
+        .notification.error {
+            border-left-color: #ef4444;
+        }
+
+        .notification__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 8px;
+        }
+
+        .notification__title {
+            font-weight: 600;
+            color: #111827;
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .notification__close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 0;
+            margin-left: 12px;
+        }
+
+        .notification__close:hover {
+            color: #374151;
+        }
+
+        .notification__body {
+            color: #4b5563;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .notification__changes {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0 0;
+            font-size: 0.85rem;
+        }
+
+        .notification__changes li {
+            padding: 2px 0;
+            color: #374151;
+        }
+
+        .file-actions {
+            display: flex;
+            padding: 5px 10px;
+            border: 1px solid #eee;
+            border-radius: 10px;
+            align-items: center;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .file-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .file-radio {
+            margin: 0 4px 0 0;
+            cursor: pointer;
+        }
+
+        .file-radio-label {
+            cursor: pointer;
+            user-select: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .file-radio-label.sesuai {
+            color: #059669;
+        }
+
+        .file-radio-label.tidak-sesuai {
+            color: #dc2626;
+        }
+
+        .file-radio-label:hover {
+            background-color: #f3f4f6;
+        }
+
+        .file-radio:checked+.file-radio-label.sesuai {
+            background-color: #d1fae5;
+            font-weight: 500;
+        }
+
+        .file-radio:checked+.file-radio-label.tidak-sesuai {
+            background-color: #fee2e2;
+            font-weight: 500;
+        }
+
+        /* Loading state for radio buttons */
+        .file-radio-label.loading {
+            opacity: 0.6;
+            pointer-events: none;
+            position: relative;
+        }
+
+        .file-radio-label.loading::after {
+            content: "";
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            margin: auto;
+            border: 1px solid transparent;
+            border-top-color: #6b7280;
+            border-radius: 50%;
+            animation: radio-loading-spinner 1s ease infinite;
+            top: 50%;
+            right: 4px;
+            transform: translateY(-50%);
+        }
+
+        @keyframes radio-loading-spinner {
+            from {
+                transform: translateY(-50%) rotate(0turn);
+            }
+
+            to {
+                transform: translateY(-50%) rotate(1turn);
+            }
+        }
+
+        .file-radio:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .file-display {
+            margin-bottom: 8px;
+        }
+
+        .edit-url-btn,
+        .save-url-btn,
+        .cancel-url-btn {
+            margin-left: 10px;
+            padding: 4px 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .edit-url-btn {
+            background-color: #6b7280;
+            color: white;
+        }
+
+        .edit-url-btn:hover {
+            background-color: #4b5563;
+        }
+
+        .save-url-btn {
+            background-color: #059669;
+            color: white;
+        }
+
+        .save-url-btn:hover {
+            background-color: #047857;
+        }
+
+        .cancel-url-btn {
+            background-color: #dc2626;
+            color: white;
+        }
+
+        .cancel-url-btn:hover {
+            background-color: #b91c1c;
+        }
+
+        .file-preview-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .file-icon {
+            margin-right: 6px;
+            opacity: 0.8;
+        }
+
+        .lihat-link {
+            display: inline-flex;
+            align-items: center;
+            color: #2563eb;
+            text-decoration: none;
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 6px;
+            border: 1px solid #e5e7eb;
+            background: #f8fafc;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .lihat-link:hover {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
+        }
+
+        .edit-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            box-sizing: border-box;
+            font-size: 0.9rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+            background: white;
+        }
+
+        .edit-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .edit-input:invalid {
+            border-color: #ef4444;
+        }
+
+        .edit-input:invalid:focus {
+            box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+        }
+
+        .input-with-prefix {
+            display: flex;
+            align-items: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            background: white;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .input-with-prefix:focus-within {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .input-prefix {
+            background-color: #d4e5ff;
+            border-radius: 5px 0 0 5px;
+            padding: 10px;
+            color: #6b7280;
+            font-size: 0.9rem;
+            user-select: none;
+            font-weight: 500;
+        }
+
+        .input-with-prefix .edit-input {
+            border: none;
+            padding: 10px 12px 10px 5px;
+            box-shadow: none;
+        }
+
+        .input-with-prefix .edit-input:focus {
+            border: none;
+            box-shadow: none;
+        }
+
+        .edit-url-btn,
+        .save-url-btn,
+        .cancel-url-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .edit-url-btn {
+            background-color: #64748b;
+            color: white;
+            border: 1px solid #64748b;
+        }
+
+        .edit-url-btn:hover {
+            background-color: #475569;
+            border-color: #475569;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(100, 116, 139, 0.2);
+        }
+
+        .save-url-btn {
+            background-color: #059669;
+            color: white;
+            border: 1px solid #059669;
+        }
+
+        .save-url-btn:hover {
+            background-color: #047857;
+            border-color: #047857;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(5, 150, 105, 0.2);
+        }
+
+        .cancel-url-btn {
+            background-color: #ef4444;
+            color: white;
+            border: 1px solid #ef4444;
+        }
+
+        .cancel-url-btn:hover {
+            background-color: #dc2626;
+            border-color: #dc2626;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(239, 68, 68, 0.2);
+        }
+
+        .file-edit-actions {
+            margin-top: 16px;
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+
+        .file-edit .edit-input {
+            margin-bottom: 0;
+        }
+
+        /* Button focus styles */
+        .edit-url-btn:focus,
+        .save-url-btn:focus,
+        .cancel-url-btn:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 640px) {
+            .file-preview-container {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+            }
+
+            .edit-url-btn,
+            .save-url-btn,
+            .cancel-url-btn {
+                justify-content: center;
+                width: 100%;
+            }
+        }
+
+        /* Upload Modal Styles */
+        .upload-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1300;
+        }
+
+        .upload-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            width: 600px;
+            max-width: 95vw;
+            border-radius: 12px;
+            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
+            z-index: 1301;
+            overflow: hidden;
+        }
+
+        .upload-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .upload-modal__title {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #111827;
+        }
+
+        .upload-modal__close {
+            border: none;
+            background: transparent;
+            font-size: 1.3rem;
+            cursor: pointer;
+            color: #6b7280;
+            padding: 4px;
+            border-radius: 4px;
+        }
+
+        .upload-modal__close:hover {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .upload-modal__body {
+            padding: 20px;
+        }
+
+        .upload-step {
+            margin-bottom: 20px;
+            padding: 16px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background: #f9fafb;
+        }
+
+        .upload-step__title {
+            font-weight: 600;
+            color: #111827;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-step__description {
+            color: #4b5563;
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+        }
+
+        .upload-step__button {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .upload-step__button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+
+        .upload-url-input {
+            width: 100%;
+            padding: 10px 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            transition: border-color 0.2s ease;
+        }
+
+        .upload-url-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .upload-modal__footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 16px 20px;
+            border-top: 1px solid #e5e7eb;
+            background: #f9fafb;
+        }
+
+        .upload-modal__action {
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+        }
+
+        .upload-modal__action--cancel {
+            background: #6b7280;
+            color: #fff;
+        }
+
+        .upload-modal__action--cancel:hover {
+            background: #4b5563;
+        }
+
+        .upload-modal__action--save {
+            background: #059669;
+            color: #fff;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-modal__action--save:hover {
+            background: #047857;
+        }
+
+        .upload-modal__action--save:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .upload-step.completed {
+            border-color: #10b981;
+            background: #f0fdf4;
+        }
+
+        .upload-step.completed .upload-step__title {
+            color: #059669;
+        }
+
+        .upload-file-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px dashed #e2e8f0;
+            border-radius: 8px;
+            background: #f8fafc;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+
+        .upload-file-input:hover {
+            border-color: #2563eb;
+            background: #eff6ff;
+        }
+
+        .upload-file-input:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .file-info {
+            margin-top: 12px;
+            padding: 12px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 6px;
+        }
+
+        .file-info__name {
+            font-weight: 600;
+            color: #059669;
+            margin-bottom: 4px;
+        }
+
+        .file-info__size {
+            font-size: 0.8rem;
+            color: #4b5563;
+        }
+
+        .upload-progress {
+            margin-top: 16px;
+        }
+
+        .upload-progress__bar {
+            width: 100%;
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 8px;
+        }
+
+        .upload-progress__fill {
+            height: 100%;
+            background: linear-gradient(90deg, #2563eb, #3b82f6);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 0%;
+        }
+
+        .upload-progress__text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: #4b5563;
+            font-weight: 500;
+        }
+
+        .upload-result {
+            padding: 16px;
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            margin-top: 12px;
+        }
+
+        .upload-result__file {
+            font-weight: 600;
+            color: #059669;
+            margin-bottom: 8px;
+        }
+
+        .upload-result__url {
+            font-size: 0.8rem;
+            color: #4b5563;
+            word-break: break-all;
+            background: white;
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #d1d5db;
+        }
+
+        @media (max-width: 640px) {
+            .upload-modal {
+                width: 95vw;
+                margin: 20px;
+            }
+        }
+
+        /* Loading state for upload button */
+        .upload-btn-loading {
+            background-color: #4f46e5 !important;
+        }
+
+        .upload-btn-loading::after {
+            content: "";
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            margin: auto;
+            border: 2px solid transparent;
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: button-loading-spinner 1s ease infinite;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .prefill-modal-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.4);
+            z-index: 1100;
+        }
+        .prefill-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: #fff;
+            width: 520px;
+            max-width: 94vw;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(15, 23, 42, 0.25);
+            z-index: 1101;
+            overflow: hidden;
+        }
+        .prefill-modal__header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 20px;
+            border-bottom: 1px solid #eee;
+            background: #f8fafc;
+        }
+        .prefill-modal__title {
+            margin: 0;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #111827;
+        }
+        .prefill-modal__close {
+            border: none;
+            background: transparent;
+            font-size: 1.5rem;
+            line-height: 1;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        .prefill-modal__close:hover {
+            color: #111827;
+        }
+        .prefill-modal__body {
+            padding: 20px;
+        }
+        .prefill-modal__body p {
+            margin-top: 0;
+            margin-bottom: 12px;
+            color: #4b5563;
+            font-size: 0.95rem;
+        }
+        .prefill-modal__options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .prefill-option {
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 12px 14px;
+            background: #fff;
+            text-align: left;
+            cursor: pointer;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+        .prefill-option:hover {
+            border-color: #2563eb;
+            box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
+            transform: translateY(-1px);
+        }
+        .prefill-option:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            transform: none;
+            box-shadow: none;
+        }
+        .prefill-option__title {
+            font-weight: 600;
+            color: #111827;
+        }
+        .prefill-option__url {
+            font-size: 0.8rem;
+            color: #2563eb;
+            word-break: break-all;
+        }
+        .prefill-modal__status {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #4b5563;
+        }
+        .prefill-modal__status--success {
+            color: #16a34a;
+        }
+        .prefill-modal__status--error {
+            color: #dc2626;
+        }
+        .prefill-modal__link {
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+        .prefill-modal__link a {
+            color: #2563eb;
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        /* Documents list styles */
+        .prefill-modal__documents,
+        .documents-list {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .prefill-modal__documents-header h4,
+        .documents-list__header h4 {
+            margin: 0 0 12px 0;
+            color: #334155;
+            font-size: 1rem;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .copy-all-btn {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            font-weight: 500;
+            transition: background-color 0.2s;
+        }
+
+        .copy-all-btn:hover {
+            background: #047857;
+        }
+
+        .copy-all-btn.copied {
+            background: #10b981;
+        }
+
+        .document-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .document-item:last-child {
+            border-bottom: none;
+        }
+
+        .document-item__info {
+            flex: 1;
+        }
+
+        .document-item__label {
+            font-weight: 500;
+            color: #374151;
+            font-size: 0.9rem;
+        }
+
+        .document-item__link {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 0.85rem;
+            word-break: break-all;
+        }
+
+        .document-item__link:hover {
+            text-decoration: underline;
+        }
+
+        .document-item__actions {
+            display: flex;
+            gap: 8px;
+            margin-left: 12px;
+        }
+
+        .copy-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: #2563eb;
+        }
+
+        .copy-btn.copied {
+            background: #10b981;
+        }
+
+        .view-btn {
+            background: #6366f1;
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.75rem;
+            white-space: nowrap;
+            transition: background-color 0.2s;
+        }
+
+        .view-btn:hover {
+            background: #4f46e5;
+        }
+        @media (max-width: 640px) {
+            .prefill-modal {
+                width: 95vw;
+            }
+
+        }
+
+        /* Loading Screen Styles */
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top: 4px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+
+        .loading-text {
+            font-size: 18px;
+            font-weight: 500;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .loading-subtext {
+            font-size: 14px;
+            opacity: 0.8;
+            text-align: center;
+            animation: fade 2s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        @keyframes fade {
+            0%, 100% { opacity: 0.5; }
+            50% { opacity: 1; }
+        }
+
+        /* Hide main content initially */
+        body.loading .main-content {
+            display: none;
+        }
+
+
+
+    </style>
+</head>
+
+<body class="loading">
+    <!-- Loading Screen -->
+    <div id="loadingScreen">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Memuat Aplikasi...</div>
+        <div class="loading-subtext">Sedang mengunduh data dan menginisialisasi sistem</div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+    <h2>Cari Data NIP</h2>
+    <div id="searchBox">
+        <input type="text" id="nipInput" placeholder="Masukkan NIP">
+        <button onclick="searchNIP()">Cari</button>
+    </div>
+    <div id="result"></div>
+
+    <div class="popup-overlay" id="popupOverlay"></div>
+    <div class="popup" id="popupBox">
+        <div class="popup-header" id="popupHeader">
+            <div class="popup-title">Pratinjau Berkas</div>
+            <span class="popup-close" onclick="closePopup()">X</span>
+        </div>
+        <div class="popup-body">
+            <div id="popupContent"></div>
+        </div>
+    </div>
+
+    <!-- Preview Modal -->
+    <div class="preview-overlay" id="previewOverlay"></div>
+    <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle"
+        aria-hidden="true">
+        <div class="preview-modal__header">
+            <h3 class="preview-modal__title" id="previewModalTitle">Pratinjau Perubahan</h3>
+            <button type="button" class="preview-modal__close" onclick="closePreviewModal()"
+                aria-label="Tutup pratinjau">&times;</button>
+        </div>
+        <div class="preview-modal__body">
+            <p>Anda akan mengubah bidang berikut:</p>
+            <ul class="preview-changes" id="previewChangesList"></ul>
+        </div>
+        <div class="preview-modal__footer">
+            <button type="button" class="preview-modal__action preview-modal__action--cancel"
+                onclick="closePreviewModal()">Batal</button>
+            <button type="button" class="preview-modal__action preview-modal__action--confirm" id="confirmSaveBtn"
+                onclick="confirmSaveEdits()">Simpan Perubahan</button>
+        </div>
+    </div>
+
+
+    <div class="prefill-modal-overlay" id="prefillModalOverlay"></div>
+
+    <div class="prefill-modal" id="prefillModal" role="dialog" aria-modal="true" aria-labelledby="prefillModalTitle" aria-hidden="true">
+
+        <div class="prefill-modal__header">
+
+            <h3 class="prefill-modal__title" id="prefillModalTitle">Generate Link Google Form</h3>
+
+            <button type="button" class="prefill-modal__close" onclick="closePrefillModal()" aria-label="Tutup modal generate link">&times;</button>
+
+        </div>
+
+        <div class="prefill-modal__body">
+
+            <p id="prefillInstructions">Pilih jenis formulir untuk membuat tautan autofill:</p>
+
+            <div class="prefill-modal__options" id="prefillOptionsContainer"></div>
+
+            <div class="prefill-modal__status" id="prefillModalStatus"></div>
+
+            <div class="prefill-modal__link" id="prefillModalLinkContainer"></div>
+
+            <div class="prefill-modal__documents" id="prefillModalDocumentsContainer" style="display: none;">
+                <div class="prefill-modal__documents-header">
+                    <h4>Semua Dokumen Tersedia:</h4>
+                </div>
+                <div class="prefill-modal__documents-list" id="prefillModalDocumentsList"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- Upload Modal -->
+    <div class="upload-modal-overlay" id="uploadModalOverlay"></div>
+    <div class="upload-modal" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle" aria-hidden="true">
+        <div class="upload-modal__header">
+            <h3 class="upload-modal__title" id="uploadModalTitle">Upload File Baru</h3>
+            <button type="button" class="upload-modal__close" onclick="closeUploadModal()" aria-label="Tutup upload modal">&times;</button>
+        </div>
+        <div class="upload-modal__body">
+            <div class="upload-step" id="uploadStep1">
+                <div class="upload-step__title">
+                    <span>1.</span>
+                    <span>Pilih File untuk Diupload</span>
+                </div>
+                <div class="upload-step__description">
+                    Pilih file dari komputer Anda untuk diupload ke Google Drive.
+                </div>
+                <input type="file" 
+                       id="fileInput" 
+                       class="upload-file-input" 
+                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
+                       onchange="handleFileSelect()">
+                <div class="file-info" id="fileInfo" style="display: none;">
+                    <div class="file-info__name"></div>
+                    <div class="file-info__size"></div>
+                </div>
+            </div>
+            
+            <div class="upload-step" id="uploadStep2" style="display: none;">
+                <div class="upload-step__title">
+                    <span>2.</span>
+                    <span>Upload ke Google Drive</span>
+                </div>
+                <div class="upload-step__description">
+                    Klik tombol di bawah untuk mengupload file ke Google Drive.
+                </div>
+                <button type="button" class="upload-step__button" id="uploadButton" onclick="uploadFile()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                </button>
+                <div class="upload-progress" id="uploadProgress" style="display: none;">
+                    <div class="upload-progress__bar">
+                        <div class="upload-progress__fill" id="uploadProgressFill"></div>
+                    </div>
+                    <div class="upload-progress__text" id="uploadProgressText">Mengupload...</div>
+                </div>
+            </div>
+            
+            <div class="upload-step" id="uploadStep3" style="display: none;">
+                <div class="upload-step__title">
+                    <span>3.</span>
+                    <span>Upload Berhasil!</span>
+                </div>
+                <div class="upload-step__description">
+                    File berhasil diupload ke Google Drive. URL akan otomatis tersimpan.
+                </div>
+                <div class="upload-result" id="uploadResult">
+                    <div class="upload-result__file"></div>
+                    <div class="upload-result__url"></div>
+                </div>
+            </div>
+        </div>
+        <div class="upload-modal__footer">
+            <button type="button" class="upload-modal__action upload-modal__action--cancel" onclick="closeUploadModal()">Batal</button>
+            <button type="button" class="upload-modal__action upload-modal__action--save" id="saveUploadBtn" onclick="finalizeUpload()" style="display: none;">
+                Selesai
+            </button>
+        </div>
+    </div>
+
+
+
+    <script type="text/javascript">
+        google.charts.load('current', { 'packages': ['table'] });
+        google.charts.setOnLoadCallback(init);
+
+        const headerMap = [
+            "Waktu",
+            "Jenis Usulan",
+            "Sertifikat UKKJ",
+            "Status Sertifikat LULUS UKKJ",
+            "No. Sertifikat",
+            "Tgl. Sertifikat",
+            "NIP",
+            "Nama Lengkap (Berikut Gelar)",
+            "Pangkat",
+            "Golongan/Ruang",
+            "TMT Kenaikan Pangkat Terakhir",
+            "Satuan Kerja",
+            "Unit Kerja",
+            "Provinsi",
+            "Jabatan Lama",
+            "Nilai PAK Konversi Terakhir",
+            "Jabatan Baru",
+            "Surat Pengantar dan SPTJM dari Kepala Kantor",
+            "Status Surat Pengantar dan SPTJM dari Kepala Kantor",
+            "SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
+            "Status SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
+            "PAK Konversi Terakhir",
+            "Status PAK Konversi Terakhir",
+            "Ijazah dan Transkrip nilai terakhir",
+            "Status Ijazah dan Transkrip nilai terakhir",
+            "Penilaian SKP 2 tahun terakhir",
+            "Status Penilaian SKP 2 tahun terakhir",
+            "SUKET TUBEL",
+            "Status SUKET TUBEL",
+            "SUKET HUKDIS",
+            "Status SUKET HUKDIS",
+            "Keterangan"
+        ];
+        const EDITABLE_COLUMNS = new Set([1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
+        const VISIBLE_COLUMNS = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27, 29, 31];
+        
+        // Columns that require single quote prefix: No. Sertifikat, Tgl. Sertifikat, NIP, TMT Kenaikan Pangkat Terakhir, Nilai PAK Konversi Terakhir
+        const SINGLE_QUOTE_PREFIX_COLUMNS = new Set([4, 5, 6, 10, 15]);
+
+        const FILE_STATUS_MAP = {
+            2: 3,
+            17: 18,
+            19: 20,
+            21: 22,
+            23: 24,
+            25: 26,
+            27: 28,
+            29: 30
+        };
+
+        // Upload link mapping for different file types
+        const UPLOAD_LINKS_MAP = {
+            2: 'https://drive.google.com/drive/folders/1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
+            17: 'https://drive.google.com/drive/folders/1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
+            19: 'https://drive.google.com/drive/folders/1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
+            21: 'https://drive.google.com/drive/folders/1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
+            23: 'https://drive.google.com/drive/folders/1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
+            25: 'https://drive.google.com/drive/folders/1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
+            27: 'https://drive.google.com/drive/folders/1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
+            29: 'https://drive.google.com/drive/folders/1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
+        };
+
+        // Folder ID mapping for upload functionality
+        const UPLOAD_FOLDER_IDS = {
+            2: '1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
+            17: '1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
+            19: '1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
+            21: '1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
+            23: '1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
+            25: '1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
+            27: '1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
+            29: '1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
+        };
+
+        const PREFILL_FORM_OPTIONS = {
+
+            pendisGuruMadrasah: { label: 'Link Pendis Guru Madrasah', url: 'https://docs.google.com/forms/d/e/1FAIpQLSd3eHdh50pX7awV7tJ9pRj84ik7MwRXlVPWEmxwSLLOjjrrNQ/viewform' },
+
+            pendisGuruPai: { label: 'Link Pendis Guru PAI', url: 'https://docs.google.com/forms/d/e/1FAIpQLSeHlMDmPURIXer6BDzvDjWi2d7tLxS36ja2nJyF831M5SVL5w/viewform' },
+
+            kristen: { label: 'Link Kristen', url: 'https://docs.google.com/forms/d/e/1FAIpQLSegMFQYpluo8ephxSeSnmBQs1I8e2MtAVE6eQGFfRj4XeQQaA/viewform' },
+
+            katolik: { label: 'Link Katolik', url: 'https://docs.google.com/forms/d/1oPGwdvnYktOaeKQroPKX9STipnlNL52UvqU2s_N9r_0/viewform?edit_requested=true' },
+
+            hindu: { label: 'Link Hindu', url: 'https://docs.google.com/forms/d/e/1FAIpQLSdcicvfjkyWFSNRfJF1B2eLwBP2OEF3IlUYzDNkVciFuMDI4Q/viewform' },
+
+            buddha: { label: 'Link Buddha', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc9Eu2pW1KhpPxgLeA5G7sMWHYJyJ1Fvr9u706-QNPlL__H6Q/viewform' }
+
+        };
+
+
+
+        let dataTable;
+        let currentRowIndex = null;
+        let currentRowDataIndex = null;
+        let isSaving = false;
+        let isPrefilling = false;
+        let pendingChanges = null;
+
+        function init() {
+            const query = new google.visualization.Query(
+                "https://docs.google.com/spreadsheets/d/1DZbPotFtHoPWVnG6N3kk1J8XeOmwUo_K1v-ZXBpbVrA/gviz/tq?sheet=DBClear"
+            );
+            query.send(handleQueryResponse);
+            setupDrag();
+            setupPreviewModal();
+            setupPrefillModal();
+            initUpload();
+        }
+
+        function hideLoadingScreen() {
+            const loadingScreen = document.getElementById('loadingScreen');
+            const body = document.body;
+            
+            if (loadingScreen) {
+                // Add fade out animation
+                loadingScreen.style.opacity = '0';
+                loadingScreen.style.transition = 'opacity 0.5s ease-out';
+                
+                // Remove loading class from body to show main content
+                body.classList.remove('loading');
+                
+                // Remove loading screen after animation
+                setTimeout(() => {
+                    loadingScreen.style.display = 'none';
+                }, 500);
+            }
+        }
+
+        function handleQueryResponse(response) {
+            if (response.isError()) {
+                alert('Error: ' + response.getMessage());
+                // Hide loading screen even on error
+                hideLoadingScreen();
+                return;
+            }
+            dataTable = response.getDataTable();
+            // Hide loading screen after data is loaded
+            hideLoadingScreen();
+        }
+
+        function searchNIP() {
+            const nipInput = document.getElementById('nipInput');
+            const nip = nipInput.value.trim();
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '';
+
+            currentRowIndex = null;
+            currentRowDataIndex = null;
+            resetSaveState();
+            resetPrefillUI();
+
+            if (!nip || !dataTable) return;
+
+            let found = false;
+            const nipColIndex = 6;
+
+            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
+                const nipValue = (dataTable.getFormattedValue(i, nipColIndex) || '').trim();
+                if (nipValue === nip) {
+                    found = true;
+                    const rowIndexInSheet = i + 2;
+                    currentRowIndex = rowIndexInSheet;
+                    currentRowDataIndex = i;
+
+                    const htmlParts = [];
+
+                    for (let j = 0; j < dataTable.getNumberOfColumns(); j++) {
+                        if (!VISIBLE_COLUMNS.includes(j)) continue;
+
+                        const rawValue = dataTable.getValue(i, j);
+                        const displayLabel = headerMap[j] || dataTable.getColumnLabel(j) || `Kolom ${j + 1}`;
+                        const safeLabel = escapeHtml(displayLabel);
+                        const displayValue = formatValueForDisplay(rawValue);
+                        const safeDisplayValue = escapeHtml(displayValue);
+                        const inputValue = formatValueForInput(rawValue, j);
+                        const isEditable = EDITABLE_COLUMNS.has(j);
+
+                        if (typeof rawValue === 'string' && rawValue.includes('drive.google.com')) {
+                            let fileIdMatch = rawValue.match(/id=([a-zA-Z0-9_-]+)/);
+                            if (!fileIdMatch) fileIdMatch = rawValue.match(/d\/([a-zA-Z0-9_-]+)/);
+
+                            if (fileIdMatch && fileIdMatch[1]) {
+                                const fileId = fileIdMatch[1];
+                                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+
+                                // Get status column index and current status
+                                const statusColIndex = FILE_STATUS_MAP[j];
+                                let currentStatus = '';
+                                if (statusColIndex !== undefined) {
+                                    currentStatus = dataTable.getFormattedValue(i, statusColIndex) || '';
+                                }
+
+                                // Get upload link for this file type
+                                const uploadLink = UPLOAD_LINKS_MAP[j];
+
+                                let fileActionsHtml = '';
+                                if (statusColIndex !== undefined) {
+                                    const isSesuai = currentStatus.toLowerCase().includes('sesuai') && !currentStatus.toLowerCase().includes('tidak');
+                                    const isTidakSesuai = currentStatus.toLowerCase().includes('tidak sesuai');
+
+                                    fileActionsHtml = `
+                                    <div class="file-actions">
+                                        <div class="file-status-header">
+                                            Status Verifikasi
+                                        </div>
+                                        <div class="file-status">
+                                            <input type="radio" 
+                                                   id="sesuai_${j}" 
+                                                   name="status_${j}"
+                                                   class="file-radio" 
+                                                   data-col-index="${j}"
+                                                   data-status-col="${statusColIndex}"
+                                                   data-status-type="sesuai"
+                                                   value="sesuai"
+                                                   ${isSesuai ? 'checked' : ''}
+                                                   onchange="updateFileStatus(this)">
+                                            <label for="sesuai_${j}" class="file-radio-label sesuai">Sesuai</label>
+                                            
+                                            <input type="radio" 
+                                                   id="tidak_sesuai_${j}" 
+                                                   name="status_${j}"
+                                                   class="file-radio" 
+                                                   data-col-index="${j}"
+                                                   data-status-col="${statusColIndex}"
+                                                   data-status-type="tidak_sesuai"
+                                                   value="tidak_sesuai"
+                                                   ${isTidakSesuai ? 'checked' : ''}
+                                                   onchange="updateFileStatus(this)">
+                                            <label for="tidak_sesuai_${j}" class="file-radio-label tidak-sesuai">Tidak Sesuai</label>
+                                            
+                                            <input type="radio" 
+                                                   id="kosong_${j}" 
+                                                   name="status_${j}"
+                                                   class="file-radio" 
+                                                   data-col-index="${j}"
+                                                   data-status-col="${statusColIndex}"
+                                                   data-status-type="kosong"
+                                                   value=""
+                                                   ${!isSesuai && !isTidakSesuai ? 'checked' : ''}
+                                                   onchange="updateFileStatus(this)">
+                                            <label for="kosong_${j}" class="file-radio-label">Belum Ditentukan</label>
+                                        </div>
+                                    </div>
+                                `;
+                                }
+
+                                htmlParts.push(`
+                                <div class="field">
+                                    <div class="label">${safeLabel}</div>
+                                    <div class="value">
+                                        <div id="file_display_${j}" class="file-display">
+                                            <div class="file-preview-container">
+                                                <span
+                                                    class="lihat-link"
+                                                    role="button"
+                                                    aria-label="Lihat File"
+                                                    onclick="openPopup('${embedUrl}')"
+                                                >
+                                                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" class="file-icon">
+                                                        <path d="M12 4.5C7 4.5 2.73 7.61 1 12c1.73 4.39 6 7.5 11 7.5s9.27-3.11 11-7.5c-1.73-4.39-6-7.5-11-7.5zM12 17c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5zm0-8c-1.66 0-3 1.34-3 3s1.34 3 3 3 3-1.34 3-3-1.34-3-3-3z"/>
+                                                    </svg>
+                                                    Lihat File
+                                                </span>
+                                                ${uploadLink ? `
+                                                <button type="button" class="edit-url-btn" onclick="openUploadModal(${j}, '${uploadLink}')">
+                                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                                                        <path d="M14,2H6A2,2 0 0,0 4,4V20A2,2 0 0,0 6,22H18A2,2 0 0,0 20,20V8L14,2M18,20H6V4H13V9H18V20Z"/>
+                                                    </svg>
+                                                    Upload File
+                                                </button>` : ''}
+                                            </div>
+                                        </div>
+                                        ${fileActionsHtml}
+                                    </div>
+                                </div>`);
+                                continue;
+                            }
+                        }
+
+                        if (isEditable) {
+                            const prefixHTML = generatePrefixHTML(j);
+                            const inputClass = prefixHTML ? 'input-with-prefix' : '';
+                            
+                            htmlParts.push(`
+                            <div class="field">
+                                <div class="label">${safeLabel}</div>
+                                <div class="value">
+                                    <div class="${inputClass}">
+                                        ${prefixHTML}
+                                        <input
+                                            type="text"
+                                            class="edit-input"
+                                            data-col-index="${j}"
+                                            value="${escapeHtml(inputValue)}"
+                                        />
+                                    </div>
+                                </div>
+                            </div>`);
+                        } else {
+                            htmlParts.push(`
+                            <div class="field">
+                                <div class="label">${safeLabel}</div>
+                                <div class="value">${safeDisplayValue}</div>
+                            </div>`);
+                        }
+                    }
+
+                    htmlParts.push(`
+                    <div class="actions">
+                        <button class="primary" id="saveChangesBtn" onclick="saveEdits()">
+                            <span id="saveButtonText">Simpan Perubahan</span>
+                        </button>
+                        <span class="status-message" id="prefillStatus"></span>
+                    </div>
+                    <div class="prefill-link" id="prefillLinkContainer"></div>`);
+
+                    resultDiv.innerHTML = htmlParts.join('');
+                    resetSaveState();
+                    resetPrefillUI();
+                    break;
+                }
+            }
+
+            if (!found) {
+                resultDiv.innerHTML = '<p>NIP tidak ditemukan</p>';
+                resetPrefillUI();
+            }
+        }
+
+        function setRadioLoading(label, isLoading) {
+            if (!label) return;
+
+            if (isLoading) {
+                label.classList.add('loading');
+            } else {
+                label.classList.remove('loading');
+            }
+        }
+        function setSavingState(state) {
+            isSaving = state;
+            const button = document.getElementById('saveChangesBtn');
+            const buttonText = document.getElementById('saveButtonText');
+            const confirmBtn = document.getElementById('confirmSaveBtn');
+
+            if (button && buttonText) {
+                button.disabled = state;
+                if (state) {
+                    button.classList.add('btn-loading');
+                    buttonText.textContent = 'Menyimpan...';
+                } else {
+                    button.classList.remove('btn-loading');
+                    buttonText.textContent = 'Simpan Perubahan';
+                }
+            }
+
+            if (confirmBtn) {
+                confirmBtn.disabled = state;
+                if (state) {
+                    confirmBtn.classList.add('btn-loading');
+                    confirmBtn.innerHTML = '<span>Menyimpan...</span>';
+                } else {
+                    confirmBtn.classList.remove('btn-loading');
+                    confirmBtn.innerHTML = 'Simpan Perubahan';
+                }
+            }
+        }
+        function resetSaveState() {
+            isSaving = false;
+            const button = document.getElementById('saveChangesBtn');
+            const buttonText = document.getElementById('saveButtonText');
+            const confirmBtn = document.getElementById('confirmSaveBtn');
+
+            if (button && buttonText) {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+                buttonText.textContent = 'Simpan Perubahan';
+            }
+
+            if (confirmBtn) {
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('btn-loading');
+                confirmBtn.innerHTML = 'Simpan Perubahan';
+            }
+
+            pendingChanges = null;
+            resetPrefillUI();
+            closePrefillModal();
+        }
+
+
+        function renderPrefillOptions() {
+            const container = document.getElementById('prefillOptionsContainer');
+            if (!container) return;
+
+            container.innerHTML = '';
+
+            Object.entries(PREFILL_FORM_OPTIONS).forEach(([key, config]) => {
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'prefill-option';
+                button.dataset.formKey = key;
+                button.innerHTML = `
+                    <span class="prefill-option__title">${escapeHtml(config.label)}</span>
+                `;
+                button.addEventListener('click', () => handlePrefillOptionClick(key));
+                container.appendChild(button);
+            });
+        }
+
+        function setupPrefillModal() {
+            const overlay = document.getElementById('prefillModalOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closePrefillModal);
+            }
+            renderPrefillOptions();
+        }
+
+        function openPrefillModal() {
+            if (currentRowIndex === null || currentRowDataIndex === null) {
+                showNotification('Tidak ada data yang dipilih.', 'error');
+                updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
+                return;
+            }
+
+            const overlay = document.getElementById('prefillModalOverlay');
+            const modal = document.getElementById('prefillModal');
+            const prefillInstructions = document.getElementById('prefillInstructions');
+            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+            if (!overlay || !modal) return;
+
+            if (!isPrefilling) {
+                const optionButtons = document.querySelectorAll('.prefill-option');
+                optionButtons.forEach(btn => btn.disabled = false);
+                
+                // Show instructions and options if not currently processing
+                if (prefillInstructions) {
+                    prefillInstructions.style.display = 'block';
+                }
+                if (prefillOptionsContainer) {
+                    prefillOptionsContainer.style.display = 'block';
+                }
+            }
+
+            updatePrefillStatus('', 'default');
+
+            const modalLink = document.getElementById('prefillModalLinkContainer');
+            const container = document.getElementById('prefillLinkContainer');
+            if (modalLink) {
+                modalLink.innerHTML = container ? container.innerHTML : '';
+            }
+
+            overlay.style.display = 'block';
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closePrefillModal() {
+            const overlay = document.getElementById('prefillModalOverlay');
+            const modal = document.getElementById('prefillModal');
+            if (!overlay || !modal) return;
+
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function handlePrefillOptionClick(formKey) {
+            if (!formKey) return;
+            syncPrefillLink(formKey);
+        }
+
+        function updatePrefillStatus(message, type = 'default') {
+            const status = document.getElementById('prefillStatus');
+            const modalStatus = document.getElementById('prefillModalStatus');
+            const safeMessage = message || '';
+
+            if (status) {
+                let className = 'status-message';
+                if (type === 'success') className += ' success';
+                if (type === 'error') className += ' error';
+                status.className = className;
+                status.textContent = safeMessage;
+            }
+
+            if (modalStatus) {
+                let className = 'prefill-modal__status';
+                if (type === 'success') className += ' prefill-modal__status--success';
+                if (type === 'error') className += ' prefill-modal__status--error';
+                modalStatus.className = className;
+                modalStatus.textContent = safeMessage;
+            }
+        }
+
+        function showPrefillResultLink(url, formConfig) {
+            const container = document.getElementById('prefillLinkContainer');
+            const modalLink = document.getElementById('prefillModalLinkContainer');
+            const prefillInstructions = document.getElementById('prefillInstructions');
+            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+
+            if (url) {
+                const safeUrl = escapeHtml(url);
+                const label = formConfig ? escapeHtml(formConfig.label) : 'Form';
+                const linkText = `Buka ${label}`;
+                const linkHtml = `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+                if (container) {
+                    container.innerHTML = linkHtml;
+                }
+                if (modalLink) {
+                    modalLink.innerHTML = linkHtml;
+                }
+                
+                // Hide instructions and options after successful generation
+                if (prefillInstructions) {
+                    prefillInstructions.style.display = 'none';
+                }
+                if (prefillOptionsContainer) {
+                    prefillOptionsContainer.style.display = 'none';
+                }
+                
+                // Show documents list after successful prefill generation
+                showDocumentsList();
+            } else {
+                if (container) {
+                    container.innerHTML = '';
+                }
+                if (modalLink) {
+                    modalLink.innerHTML = '';
+                }
+                
+                // Show instructions and options again if no link
+                if (prefillInstructions) {
+                    prefillInstructions.style.display = 'block';
+                }
+                if (prefillOptionsContainer) {
+                    prefillOptionsContainer.style.display = 'block';
+                }
+                
+                // Hide documents modal if no prefill link
+                const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
+                if (documentsModalContainer) documentsModalContainer.style.display = 'none';
+            }
+        }
+
+        function showDocumentsList() {
+            if (currentRowDataIndex === null || !dataTable) return;
+
+            const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
+            const documentsModalList = document.getElementById('prefillModalDocumentsList');
+
+            // Define file columns that contain documents
+            const documentColumns = [
+                { index: 2, label: 'Sertifikat UKKJ' },
+                { index: 17, label: 'Surat Pengantar dan SPTJM' },
+                { index: 19, label: 'SK CPNS, SK PNS, SK Jabatan, SK Pangkat' },
+                { index: 21, label: 'PAK Konversi Terakhir' },
+                { index: 23, label: 'Ijazah dan Transkrip' },
+                { index: 25, label: 'Penilaian SKP 2 tahun terakhir' },
+                { index: 27, label: 'SUKET TUBEL' },
+                { index: 29, label: 'SUKET HUKDIS' }
+            ];
+
+            const availableDocuments = [];
+
+            // Collect available documents
+            documentColumns.forEach(doc => {
+                const fileValue = dataTable.getValue(currentRowDataIndex, doc.index);
+                if (fileValue && fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
+                    availableDocuments.push({
+                        label: doc.label,
+                        url: fileValue.toString().trim(),
+                        columnIndex: doc.index
+                    });
+                }
+            });
+
+            if (availableDocuments.length === 0) {
+                // Hide modal container if no documents
+                if (documentsModalContainer) documentsModalContainer.style.display = 'none';
+                return;
+            }
+
+            // Generate HTML for documents list
+            const documentsHtml = availableDocuments.map(doc => {
+                const shortUrl = doc.url.length > 50 ? doc.url.substring(0, 50) + '...' : doc.url;
+                return `
+                    <div class="document-item">
+                        <div class="document-item__info">
+                            <div class="document-item__label">${escapeHtml(doc.label)}</div>
+                            <a href="${escapeHtml(doc.url)}" target="_blank" class="document-item__link">${escapeHtml(shortUrl)}</a>
+                        </div>
+                        <div class="document-item__actions">
+                            <button class="view-btn" onclick="viewDocument('${escapeHtml(doc.url)}')">Lihat</button>
+                            <button class="copy-btn" onclick="copyDocumentLink('${escapeHtml(doc.url)}', this)">Copy</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Generate header with copy all button
+            const headerHtml = `
+                <h4>
+                    Semua Dokumen Tersedia:
+                    <button class="copy-all-btn" onclick="copyAllDocuments()">Copy All Links</button>
+                </h4>
+            `;
+
+            // Show and populate modal container only
+            if (documentsModalContainer && documentsModalList) {
+                documentsModalContainer.style.display = 'block';
+                const modalHeaderElement = documentsModalContainer.querySelector('.prefill-modal__documents-header');
+                if (modalHeaderElement) {
+                    modalHeaderElement.innerHTML = headerHtml;
+                }
+                documentsModalList.innerHTML = documentsHtml;
+            }
+
+            // Store available documents globally for copy all function
+            window.currentAvailableDocuments = availableDocuments;
+        }
+
+        function copyAllDocuments() {
+            if (!window.currentAvailableDocuments || window.currentAvailableDocuments.length === 0) {
+                showNotification('Tidak ada dokumen yang tersedia untuk disalin.', 'error');
+                return;
+            }
+
+            // Create formatted text with all document links
+            const allLinks = window.currentAvailableDocuments.map(doc => {
+                return `${doc.label}:\n${doc.url}`;
+            }).join('\n\n');
+
+            navigator.clipboard.writeText(allLinks).then(() => {
+                // Update all copy all buttons
+                const copyAllButtons = document.querySelectorAll('.copy-all-btn');
+                copyAllButtons.forEach(button => {
+                    const originalText = button.textContent;
+                    button.textContent = 'Copied All!';
+                    button.classList.add('copied');
+                    
+                    setTimeout(() => {
+                        button.textContent = originalText;
+                        button.classList.remove('copied');
+                    }, 3000);
+                });
+                
+                showNotification(`${window.currentAvailableDocuments.length} link dokumen berhasil disalin ke clipboard.`, 'success');
+            }).catch(err => {
+                console.error('Failed to copy all: ', err);
+                showNotification('Gagal menyalin semua link.', 'error');
+            });
+        }
+
+        function copyDocumentLink(url, button) {
+            navigator.clipboard.writeText(url).then(() => {
+                const originalText = button.textContent;
+                button.textContent = 'Copied!';
+                button.classList.add('copied');
+                
+                setTimeout(() => {
+                    button.textContent = originalText;
+                    button.classList.remove('copied');
+                }, 2000);
+                
+                showNotification('Link berhasil disalin ke clipboard.', 'success');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                showNotification('Gagal menyalin link.', 'error');
+            });
+        }
+
+        function viewDocument(url) {
+            // Extract file ID and create preview URL
+            let fileId = null;
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/, 
+                /id=([a-zA-Z0-9_-]+)/, 
+                /\/open\?id=([a-zA-Z0-9_-]+)/, 
+                /\/view\?id=([a-zA-Z0-9_-]+)/, 
+                /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/
+            ];
+            
+            for (const pattern of patterns) {
+                const match = url.match(pattern);
+                if (match && match[1]) {
+                    fileId = match[1];
+                    break;
+                }
+            }
+
+            if (fileId) {
+                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                openPopup(embedUrl);
+            } else {
+                // Fallback to original URL
+                window.open(url, '_blank');
+            }
+        }
+
+        function setPrefillState(state, formLabel = '') {
+            isPrefilling = state;
+            const button = document.getElementById('prefillBtn');
+            const buttonText = document.getElementById('prefillButtonText');
+            const optionButtons = document.querySelectorAll('.prefill-option');
+
+            if (button && buttonText) {
+                button.disabled = state;
+                if (state) {
+                    button.classList.add('btn-loading');
+                    buttonText.textContent = 'Menyiapkan...';
+                } else {
+                    button.classList.remove('btn-loading');
+                    buttonText.textContent = 'Generate Link Prefill';
+                }
+            }
+
+            optionButtons.forEach(btn => {
+                btn.disabled = state;
+            });
+
+            if (state) {
+                const statusMessage = formLabel ? `Menyiapkan tautan untuk ${formLabel}...` : 'Sedang menyiapkan tautan...';
+                updatePrefillStatus(statusMessage);
+            }
+        }
+
+        function resetPrefillUI() {
+            isPrefilling = false;
+            const button = document.getElementById('prefillBtn');
+            const buttonText = document.getElementById('prefillButtonText');
+            const container = document.getElementById('prefillLinkContainer');
+            const modalLink = document.getElementById('prefillModalLinkContainer');
+            const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
+            const prefillInstructions = document.getElementById('prefillInstructions');
+            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+            const optionButtons = document.querySelectorAll('.prefill-option');
+
+            if (button && buttonText) {
+                button.disabled = false;
+                button.classList.remove('btn-loading');
+                buttonText.textContent = 'Generate Link Prefill';
+            }
+
+            optionButtons.forEach(btn => {
+                btn.disabled = false;
+            });
+
+            updatePrefillStatus('', 'default');
+
+            if (container) {
+                container.innerHTML = '';
+            }
+
+            if (modalLink) {
+                modalLink.innerHTML = '';
+            }
+
+            // Show instructions and options again
+            if (prefillInstructions) {
+                prefillInstructions.style.display = 'block';
+            }
+            if (prefillOptionsContainer) {
+                prefillOptionsContainer.style.display = 'block';
+            }
+
+            // Hide documents modal container
+            if (documentsModalContainer) {
+                documentsModalContainer.style.display = 'none';
+            }
+        }
+
+        function syncPrefillLink(formKey) {
+            if (isPrefilling) {
+                return;
+            }
+
+            if (!formKey || !Object.prototype.hasOwnProperty.call(PREFILL_FORM_OPTIONS, formKey)) {
+                updatePrefillStatus('Pilih jenis form yang valid.', 'error');
+                showNotification('Pilih jenis form yang valid.', 'error');
+                return;
+            }
+
+            if (currentRowIndex === null || currentRowDataIndex === null) {
+                updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
+                showNotification('Tidak ada data yang dipilih.', 'error');
+                return;
+            }
+
+            if (!google || !google.script || !google.script.run) {
+                updatePrefillStatus('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                showNotification('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                return;
+            }
+
+            const formConfig = PREFILL_FORM_OPTIONS[formKey];
+
+            setPrefillState(true, formConfig.label);
+
+            google.script.run
+                .withSuccessHandler((result) => {
+                    setPrefillState(false);
+
+                    const url = result && result.url ? result.url : '';
+                    const message = result && result.message ? result.message : '';
+
+                    if (url) {
+                        showPrefillResultLink(url, formConfig);
+                        updatePrefillStatus('Tautan prefill siap dibuka.', 'success');
+                        showNotification(`Tautan prefill ${formConfig.label} berhasil dibuat.`, 'success');
+                    } else {
+                        showPrefillResultLink('', formConfig);
+                        const errorMessage = message || 'Tidak ada data untuk disinkronisasi.';
+                        updatePrefillStatus(errorMessage, 'error');
+                        showNotification(message || 'Tidak dapat membuat tautan prefill.', 'error');
+                    }
+                })
+                .withFailureHandler((error) => {
+                    console.error(error);
+                    setPrefillState(false);
+
+                    updatePrefillStatus('Gagal sinkronisasi.', 'error');
+                    const errorMessage = 'Gagal sinkronisasi prefill: ' + (error && error.message ? error.message : error);
+                    showNotification(errorMessage, 'error');
+                })
+                .syncPrefillForRow(currentRowIndex, formKey);
+        }
+        function showNotification(message, type = 'info', changes = null) {
+            // Remove existing notifications
+            const existingNotifications = document.querySelectorAll('.notification');
+            existingNotifications.forEach(n => n.remove());
+
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+
+            let title = 'Informasi';
+            if (type === 'success') title = 'Berhasil';
+            if (type === 'error') title = 'Error';
+
+            let changesHtml = '';
+            if (changes && changes.length > 0) {
+                const changesList = changes.map(change =>
+                    `<li>${escapeHtml(change.label)}: ${escapeHtml(change.from)} &rarr; ${escapeHtml(change.to)}</li>`
+                ).join('');
+                changesHtml = `<ul class="notification__changes">${changesList}</ul>`;
+            }
+
+            notification.innerHTML = `
+                <div class="notification__header">
+                    <h4 class="notification__title">${title}</h4>
+                    <button class="notification__close" onclick="this.parentElement.parentElement.remove()">&times;</button>
+                </div>
+                <div class="notification__body">
+                    ${escapeHtml(message)}
+                    ${changesHtml}
+                </div>
+            `;
+
+            document.body.appendChild(notification);
+
+            // Show notification
+            setTimeout(() => {
+                notification.classList.add('show');
+            }, 100);
+
+            // Auto hide after 5 seconds
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.classList.remove('show');
+                    setTimeout(() => {
+                        if (notification.parentElement) {
+                            notification.remove();
+                        }
+                    }, 300);
+                }
+            }, 5000);
+        }
+
+        function showSuccessNotification(changes) {
+            // Filter out Keterangan changes from notifications
+            const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
+            
+            const message = filteredChanges.length === 1 ?
+                'Perubahan berhasil disimpan.' :
+                filteredChanges.length > 1 ?
+                `${filteredChanges.length} perubahan berhasil disimpan.` :
+                'Data berhasil disimpan.';
+            showNotification(message, 'success', filteredChanges);
+        }
+
+        function openPreviewModal(changes) {
+            if (!Array.isArray(changes)) return;
+            
+            // Filter out Keterangan changes from preview modal
+            const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
+            
+            const overlay = document.getElementById('previewOverlay');
+            const modal = document.getElementById('previewModal');
+            const list = document.getElementById('previewChangesList');
+            const confirmBtn = document.getElementById('confirmSaveBtn');
+
+            if (!overlay || !modal || !list || !confirmBtn) return;
+
+            // Reset confirm button state
+            confirmBtn.disabled = false;
+            confirmBtn.classList.remove('btn-loading');
+
+            list.innerHTML = '';
+            filteredChanges.forEach((entry) => {
+                const item = document.createElement('li');
+                item.className = 'preview-change-item';
+                item.innerHTML = `
+                    <div class="preview-change-item__label">${escapeHtml(entry.label)}</div>
+                    <div class="preview-change-item__values">
+                        <span class="preview-change-item__from">${escapeHtml(entry.from)}</span>
+                        <span class="preview-change-item__arrow">&rarr;</span>
+                        <span class="preview-change-item__to">${escapeHtml(entry.to)}</span>
+                    </div>
+                `;
+                list.appendChild(item);
+            });
+
+            overlay.style.display = 'block';
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closePreviewModal() {
+            const overlay = document.getElementById('previewOverlay');
+            const modal = document.getElementById('previewModal');
+            if (!overlay || !modal) return;
+
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        function setupPreviewModal() {
+            const overlay = document.getElementById('previewOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closePreviewModal);
+            }
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatValueForDisplay(value) {
+            if (value === null || value === undefined) return '';
+            if (value instanceof Date) {
+                return value.toLocaleDateString('id-ID');
+            }
+            return String(value);
+        }
+
+        function formatValueForInput(value, columnIndex = null) {
+            if (value === null || value === undefined) {
+                return '';
+            }
+            
+            let formattedValue = '';
+            if (value instanceof Date) {
+                const year = value.getFullYear();
+                const month = String(value.getMonth() + 1).padStart(2, '0');
+                const day = String(value.getDate()).padStart(2, '0');
+                formattedValue = `${year}-${month}-${day}`;
+            } else {
+                formattedValue = String(value);
+                // Remove single quote prefix if it exists for display in input
+                if (columnIndex !== null && SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
+                    if (formattedValue.startsWith("'")) {
+                        formattedValue = formattedValue.substring(1);
+                    }
+                }
+            }
+            
+            return formattedValue;
+        }
+
+        function generatePrefixHTML(columnIndex) {
+            if (SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
+                return '<div class="input-prefix">\'</div>';
+            }
+            return '';
+        }
+
+        function normalizeForComparison(value) {
+            if (value === null || value === undefined) return '';
+            return String(value).trim();
+        }
+
+        function formatChangeDisplay(value) {
+            if (value === null || value === undefined || value === '') return '(kosong)';
+            if (value instanceof Date) {
+                return value.toLocaleDateString('id-ID');
+            }
+            if (typeof value === 'string') {
+                const trimmed = value.trim();
+                if (!trimmed) return '(kosong)';
+                
+                // Remove single quote prefix for display in preview
+                const cleanValue = trimmed.startsWith("'") ? trimmed.substring(1) : trimmed;
+                
+                if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+                    const parts = cleanValue.split('-').map(Number);
+                    const parsed = new Date(parts[0], parts[1] - 1, parts[2]);
+                    if (!Number.isNaN(parsed.getTime())) {
+                        return parsed.toLocaleDateString('id-ID');
+                    }
+                }
+                return cleanValue;
+            }
+            return String(value);
+        }
+
+        function updateStatus(statusText, rowIndex) {
+            google.script.run
+                .withSuccessHandler(function (response) {
+                    console.log(response);
+                    showNotification(`Status ${statusText} berhasil diperbarui.`, 'success');
+                    resetDisplay();
+                })
+                .withFailureHandler(function (error) {
+                    console.error(error);
+                    showNotification('Gagal memperbarui status. Silakan coba lagi.', 'error');
+                })
+                .updateKeterangan(rowIndex, statusText);
+        }
+
+        function saveEdits() {
+            if (isSaving) return;
+            if (currentRowIndex === null || currentRowDataIndex === null) {
+                showNotification('Tidak ada data yang dipilih.', 'error');
+                return;
+            }
+
+            if (!google || !google.script || !google.script.run) {
+                showNotification('Fitur simpan hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                return;
+            }
+
+            const inputs = document.querySelectorAll('.edit-input[data-col-index]');
+            const updates = {};
+            const changeSummaries = [];
+
+            inputs.forEach((input) => {
+                const colIndex = Number(input.getAttribute('data-col-index'));
+                if (Number.isNaN(colIndex) || !EDITABLE_COLUMNS.has(colIndex)) return;
+
+                const rawInputValue = input.value ?? '';
+                let newValue = rawInputValue.trim();
+
+                // Get original value from data table
+                const originalRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
+                let originalValue = '';
+
+                if (originalRawValue instanceof Date) {
+                    const year = originalRawValue.getFullYear();
+                    const month = String(originalRawValue.getMonth() + 1).padStart(2, '0');
+                    const day = String(originalRawValue.getDate()).padStart(2, '0');
+                    originalValue = `${year}-${month}-${day}`;
+                    // Add single quote prefix for date columns that require it
+                    if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
+                        originalValue = "'" + originalValue;
+                    }
+                } else {
+                    originalValue = String(originalRawValue || '').trim();
+                    // No need to add prefix here since we'll check the raw value as-is
+                }
+
+                // For single quote prefix columns, ensure we add the prefix in the new value
+                if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
+                    // Add prefix to the new value if it has content
+                    if (newValue) {
+                        newValue = "'" + newValue;
+                    }
+                }
+
+                // Compare values (remove prefix for comparison)
+                const normalizedOriginal = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && originalValue.startsWith("'") 
+                    ? originalValue.substring(1) 
+                    : originalValue;
+                const normalizedNew = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'") 
+                    ? newValue.substring(1) 
+                    : newValue;
+
+                if (normalizedOriginal !== normalizedNew) {
+                    const label = headerMap[colIndex] || dataTable.getColumnLabel(colIndex) || `Kolom ${colIndex + 1}`;
+
+                    // Convert date input back to proper format if needed
+                    let processedValue = newValue;
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(newValue.replace(/^'/, ''))) {
+                        // For date fields with prefix, keep the prefix
+                        if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")) {
+                            processedValue = newValue; // Keep prefix + date
+                        } else {
+                            processedValue = newValue; // Regular date
+                        }
+                    }
+
+                    updates[colIndex] = processedValue;
+                    changeSummaries.push({
+                        label,
+                        from: formatChangeDisplay(originalRawValue),
+                        to: formatChangeDisplay(processedValue)
+                    });
+                }
+            });
+
+            // Check file verification status and update Keterangan
+            const keteranganStatus = checkFileVerificationStatus();
+            const keteranganColIndex = 31; // Kolom Keterangan
+            const currentKeterangan = dataTable.getValue(currentRowDataIndex, keteranganColIndex) || '';
+
+            if (keteranganStatus !== currentKeterangan.trim()) {
+                updates[keteranganColIndex] = keteranganStatus;
+                // Note: Keterangan changes are not shown in preview/notifications per user request
+                // changeSummaries.push({
+                //     label: 'Keterangan',
+                //     from: formatChangeDisplay(currentKeterangan),
+                //     to: formatChangeDisplay(keteranganStatus)
+                // });
+            }
+
+            // Ensure all single quote prefix columns have proper prefix, even if not edited
+            SINGLE_QUOTE_PREFIX_COLUMNS.forEach(colIndex => {
+                // Skip if this column was already processed above
+                if (updates.hasOwnProperty(colIndex)) return;
+                
+                // Get current value from data table
+                const currentRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
+                let currentValue = '';
+                
+                if (currentRawValue instanceof Date) {
+                    const year = currentRawValue.getFullYear();
+                    const month = String(currentRawValue.getMonth() + 1).padStart(2, '0');
+                    const day = String(currentRawValue.getDate()).padStart(2, '0');
+                    currentValue = `${year}-${month}-${day}`;
+                } else {
+                    currentValue = String(currentRawValue || '').trim();
+                }
+                
+                // Check if prefix is needed
+                if (currentValue && !currentValue.startsWith("'")) {
+                    const newValue = "'" + currentValue;
+                    updates[colIndex] = newValue;
+                    // Note: We don't add this to changeSummaries to keep the preview clean
+                }
+            });
+
+            // Allow saving even if no changes
+            if (!Object.keys(updates).length) {
+                // Still proceed with save to trigger any server-side logic
+                pendingChanges = { updates: {}, changeSummaries: [] };
+                openPreviewModal([{
+                    label: 'Status',
+                    from: 'Tidak ada perubahan',
+                    to: 'Data akan disinkronisasi'
+                }]);
+                return;
+            }
+
+            pendingChanges = { updates, changeSummaries };
+            openPreviewModal(changeSummaries);
+        }
+
+        function checkFileVerificationStatus() {
+            // Define file columns that need verification
+            const fileColumns = [17, 19, 21, 23, 25, 27, 29]; // File columns
+            const statusColumns = [18, 20, 22, 24, 26, 28, 30]; // Their corresponding status columns
+
+            let allSesuai = true;
+            let hasFiles = false;
+
+            for (let i = 0; i < fileColumns.length; i++) {
+                const fileColIndex = fileColumns[i];
+                const statusColIndex = statusColumns[i];
+
+                // Check if there's a file URL in this column
+                const fileValue = dataTable.getValue(currentRowDataIndex, fileColIndex) || '';
+                if (fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
+                    hasFiles = true;
+
+                    // Check the verification status
+                    const statusValue = dataTable.getValue(currentRowDataIndex, statusColIndex) || '';
+                    const isSesuai = statusValue.toString().toLowerCase().includes('sesuai') &&
+                        !statusValue.toString().toLowerCase().includes('tidak');
+
+                    if (!isSesuai) {
+                        allSesuai = false;
+                        break;
+                    }
+                }
+            }
+
+            // Return status based on verification results
+            if (!hasFiles) {
+                return 'BELUM LENGKAP'; // No files uploaded
+            } else if (allSesuai) {
+                return 'LENGKAP'; // All files verified as "Sesuai"
+            } else {
+                return 'BELUM LENGKAP'; // Some files not verified or "Tidak Sesuai"
+            }
+        }
+
+        function confirmSaveEdits() {
+            if (!pendingChanges || isSaving) return;
+
+            const { updates, changeSummaries } = pendingChanges;
+
+            // Close preview modal and start loading state
+            closePreviewModal();
+            setSavingState(true);
+
+            console.log('Saving updates:', updates);
+            console.log('Row index:', currentRowIndex);
+
+            // If no actual updates, just show success and return
+            if (Object.keys(updates).length === 0) {
+                setTimeout(() => {
+                    setSavingState(false);
+                    pendingChanges = null;
+                    showNotification('Data berhasil disinkronisasi.', 'success');
+                    // Get updated Keterangan data after sync
+                    refreshKeteranganData();
+                    resetPrefillUI();
+                    openPrefillModal();
+                }, 1000);
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler((response) => {
+                    console.log('Save success:', response);
+
+                    // Update local data table with new values
+                    Object.entries(updates).forEach(([colIndexStr, value]) => {
+                        const colIndex = Number(colIndexStr);
+                        if (!Number.isNaN(colIndex) && dataTable) {
+                            // Convert date string back to Date object if needed
+                            let processedValue = value;
+                            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                                const parts = value.split('-').map(Number);
+                                processedValue = new Date(parts[0], parts[1] - 1, parts[2]);
+                            }
+                            dataTable.setValue(currentRowDataIndex, colIndex, processedValue);
+                        }
+                    });
+
+                    setSavingState(false);
+                    pendingChanges = null;
+
+                    // Show success notification
+                    showSuccessNotification(changeSummaries);
+
+                    // Get updated Keterangan data after successful save
+                    refreshKeteranganData();
+                    resetPrefillUI();
+                    openPrefillModal();
+                })
+                .withFailureHandler((error) => {
+                    console.error('Save error:', error);
+                    setSavingState(false);
+                    pendingChanges = null;
+                    showNotification('Gagal menyimpan perubahan: ' + (error.message || error.toString()), 'error');
+                })
+                .updateRowFields(currentRowIndex, updates);
+        }
+
+        function updateFileStatus(radio) {
+            if (currentRowIndex === null || currentRowDataIndex === null) {
+                showNotification('Tidak ada data yang dipilih.', 'error');
+                return;
+            }
+
+            if (!google || !google.script || !google.script.run) {
+                showNotification('Fitur update status hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                return;
+            }
+
+            const statusColIndex = parseInt(radio.dataset.statusCol);
+            const statusType = radio.dataset.statusType;
+            const colIndex = parseInt(radio.dataset.colIndex);
+
+            // Get all radio buttons in this group
+            const radioGroup = document.querySelectorAll(`input[name="status_${colIndex}"]`);
+            const labels = Array.from(radioGroup).map(r => document.querySelector(`label[for="${r.id}"]`));
+
+            // Set loading state for all labels in the group
+            labels.forEach(label => {
+                if (label) setRadioLoading(label, true);
+            });
+
+            // Disable all radio buttons in the group
+            radioGroup.forEach(r => r.disabled = true);
+
+            let statusValue = '';
+            if (statusType === 'sesuai') {
+                statusValue = 'Sesuai';
+            } else if (statusType === 'tidak_sesuai') {
+                statusValue = 'Tidak Sesuai';
+            }
+            // For 'kosong', statusValue remains empty string
+
+            // Prepare updates including Keterangan status
+            const updates = { [statusColIndex]: statusValue };
+
+            // Check and update Keterangan status
+            const keteranganStatus = checkFileVerificationStatusAfterUpdate(statusColIndex, statusValue);
+            const keteranganColIndex = 31;
+            updates[keteranganColIndex] = keteranganStatus;
+
+            // Update to Google Sheets
+            google.script.run
+                .withSuccessHandler(() => {
+                    // Remove loading state and enable radio buttons
+                    labels.forEach(label => {
+                        if (label) setRadioLoading(label, false);
+                    });
+                    radioGroup.forEach(r => r.disabled = false);
+
+                    // Update local data table
+                    if (dataTable) {
+                        dataTable.setValue(currentRowDataIndex, statusColIndex, statusValue);
+                        dataTable.setValue(currentRowDataIndex, keteranganColIndex, keteranganStatus);
+                    }
+
+                    const label = headerMap[statusColIndex] || `Status Kolom ${statusColIndex + 1}`;
+                    const displayStatus = statusValue || 'Belum Ditentukan';
+                    showNotification(`${label} berhasil diperbarui menjadi "${displayStatus}". Status Keterangan: ${keteranganStatus}`, 'success');
+
+                    // Get updated Keterangan data after status update
+                    refreshKeteranganData();
+                })
+                .withFailureHandler((error) => {
+                    console.error(error);
+
+                    // Remove loading state and enable radio buttons
+                    labels.forEach(label => {
+                        if (label) setRadioLoading(label, false);
+                    });
+                    radioGroup.forEach(r => r.disabled = false);
+
+                    // Reset to previous state
+                    const currentStatus = dataTable ? dataTable.getFormattedValue(currentRowDataIndex, statusColIndex) || '' : '';
+                    const isSesuai = currentStatus.toLowerCase().includes('sesuai') && !currentStatus.toLowerCase().includes('tidak');
+                    const isTidakSesuai = currentStatus.toLowerCase().includes('tidak sesuai');
+
+                    // Reset radio buttons
+                    document.getElementById(`sesuai_${colIndex}`).checked = isSesuai;
+                    document.getElementById(`tidak_sesuai_${colIndex}`).checked = isTidakSesuai;
+                    document.getElementById(`kosong_${colIndex}`).checked = !isSesuai && !isTidakSesuai;
+
+                    showNotification('Gagal memperbarui status file.', 'error');
+                })
+                .updateRowFields(currentRowIndex, updates);
+        }
+
+        // New function to refresh Keterangan data
+        function refreshKeteranganData() {
+            if (currentRowIndex === null || !google || !google.script || !google.script.run) {
+                return;
+            }
+
+            // Get updated Keterangan value from server
+            google.script.run
+                .withSuccessHandler((keteranganData) => {
+                    console.log('Keterangan data received:', keteranganData);
+
+                    if (keteranganData && dataTable && currentRowDataIndex !== null) {
+                        // Update local data table with fresh Keterangan data
+                        const keteranganColIndex = 31;
+                        dataTable.setValue(currentRowDataIndex, keteranganColIndex, keteranganData.keterangan);
+
+                        // Update display if Keterangan field is visible
+                        updateKeteranganDisplay(keteranganData);
+
+                        console.log(`Keterangan updated: ${keteranganData}`);
+                    }
+                })
+                .withFailureHandler((error) => {
+                    console.error('Failed to get Keterangan data:', error);
+                })
+                .getKeteranganData(currentRowIndex);
+        }
+
+        // Function to update Keterangan display in UI
+        function updateKeteranganDisplay(keteranganValue) {
+            // Find the Keterangan field in the result div and update its value
+            const resultDiv = document.getElementById('result');
+            if (!resultDiv) return;
+
+            const fields = resultDiv.querySelectorAll('.field');
+            fields.forEach(field => {
+                const label = field.querySelector('.label');
+                if (label && label.textContent.trim() === 'Keterangan') {
+                    const valueDiv = field.querySelector('.value');
+                    if (valueDiv) {
+                        valueDiv.textContent = keteranganValue || '';
+
+                        // Add visual indicator for status
+                        valueDiv.classList.remove('status-lengkap', 'status-belum-lengkap');
+                        if (keteranganValue === 'LENGKAP') {
+                            valueDiv.classList.add('status-lengkap');
+                        } else if (keteranganValue === 'BELUM LENGKAP') {
+                            valueDiv.classList.add('status-belum-lengkap');
+                        }
+                    }
+                }
+            });
+        }
+
+        function checkFileVerificationStatusAfterUpdate(updatedStatusCol, updatedStatusValue) {
+            // Define file columns that need verification
+            const fileColumns = [17, 19, 21, 23, 25, 27, 29]; // File columns
+            const statusColumns = [18, 20, 22, 24, 26, 28, 30]; // Their corresponding status columns
+
+            let allSesuai = true;
+            let hasFiles = false;
+
+            for (let i = 0; i < fileColumns.length; i++) {
+                const fileColIndex = fileColumns[i];
+                const statusColIndex = statusColumns[i];
+
+                // Check if there's a file URL in this column
+                const fileValue = dataTable.getValue(currentRowDataIndex, fileColIndex) || '';
+                if (fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
+                    hasFiles = true;
+
+                    // Get the status value (use updated value if this is the column being updated)
+                    let statusValue;
+                    if (statusColIndex === updatedStatusCol) {
+                        statusValue = updatedStatusValue;
+                    } else {
+                        statusValue = dataTable.getValue(currentRowDataIndex, statusColIndex) || '';
+                    }
+
+                    const isSesuai = statusValue.toString().toLowerCase().includes('sesuai') &&
+                        !statusValue.toString().toLowerCase().includes('tidak');
+
+                    if (!isSesuai) {
+                        allSesuai = false;
+                        break;
+                    }
+                }
+            }
+
+            // Return status based on verification results
+            if (!hasFiles) {
+                return 'BELUM LENGKAP'; // No files uploaded
+            } else if (allSesuai) {
+                return 'LENGKAP'; // All files verified as "Sesuai"
+            } else {
+                return 'BELUM LENGKAP'; // Some files not verified or "Tidak Sesuai"
+            }
+        }
+
+        function resetDisplay() {
+            document.getElementById('nipInput').value = '';
+            document.getElementById('result').innerHTML = '';
+            currentRowIndex = null;
+            currentRowDataIndex = null;
+            resetSaveState();
+            resetPrefillUI();
+            closePrefillModal();
+        }
+
+        function openPopup(url) {
+            document.getElementById('popupContent').innerHTML =
+                `<iframe src="${url}" allow="autoplay"></iframe>`;
+            document.getElementById('popupOverlay').style.display = 'block';
+            const box = document.getElementById('popupBox');
+            box.style.display = 'block';
+
+            box.style.top = '50%';
+            box.style.left = '';
+            box.style.right = '20px';
+            box.style.transform = 'translateY(-50%)';
+        }
+
+        function closePopup() {
+            document.getElementById('popupOverlay').style.display = 'none';
+            document.getElementById('popupBox').style.display = 'none';
+        }
+
+        function setupDrag() {
+            const box = document.getElementById('popupBox');
+            const header = document.getElementById('popupHeader');
+
+            let isDragging = false;
+            let startX = 0, startY = 0;
+            let startLeft = 0, startTop = 0;
+
+            function onMouseDown(e) {
+                if (box.style.display !== 'block') return;
+
+                isDragging = true;
+
+                const rect = box.getBoundingClientRect();
+                startX = e.clientX;
+                startY = e.clientY;
+                startLeft = rect.left;
+                startTop = rect.top;
+
+                box.style.transform = 'none';
+                box.style.left = `${startLeft}px`;
+                box.style.top = `${startTop}px`;
+                box.style.right = 'auto';
+
+                document.addEventListener('mousemove', onMouseMove);
+                document.addEventListener('mouseup', onMouseUp);
+            }
+
+            function onMouseMove(e) {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+
+                let nextLeft = startLeft + dx;
+                let nextTop = startTop + dy;
+
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                const rect = box.getBoundingClientRect();
+
+                if (nextLeft < 8) nextLeft = 8;
+                if (nextLeft + rect.width > vw - 8) nextLeft = vw - rect.width - 8;
+
+                if (nextTop < 8) nextTop = 8;
+                if (nextTop + rect.height > vh - 8) nextTop = vh - rect.height - 8;
+
+                box.style.left = `${nextLeft}px`;
+                box.style.top = `${nextTop}px`;
+            }
+
+            function onMouseUp() {
+                isDragging = false;
+                document.removeEventListener('mousemove', onMouseMove);
+                document.removeEventListener('mouseup', onMouseUp);
+            }
+
+            header.addEventListener('mousedown', onMouseDown);
+
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'Escape') {
+                    closePopup();
+                    closePreviewModal();
+                    closePrefillModal();
+                    closeUploadModal();
+                }
+            });
+
+            window.addEventListener('resize', () => {
+                if (box.style.display !== 'block') return;
+                const rect = box.getBoundingClientRect();
+                let left = rect.left;
+                let top = rect.top;
+
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+                if (left + rect.width > vw - 8) left = vw - rect.width - 8;
+                if (top + rect.height > vh - 8) top = vh - rect.height - 8;
+                if (left < 8) left = 8;
+                if (top < 8) top = 8;
+
+                box.style.left = `${left}px`;
+                box.style.top = `${top}px`;
+            });
+        }
+
+        // Upload functionality
+        let currentUploadColumnIndex = null;
+        let currentUploadFolderId = null;
+        let selectedFile = null;
+
+        function openUploadModal(columnIndex, uploadFolderUrl) {
+            currentUploadColumnIndex = columnIndex;
+            // Extract folder ID from URL
+            const folderIdMatch = uploadFolderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+            currentUploadFolderId = folderIdMatch ? folderIdMatch[1] : UPLOAD_FOLDER_IDS[columnIndex];
+            
+            const modal = document.getElementById('uploadModal');
+            const overlay = document.getElementById('uploadModalOverlay');
+            const modalTitle = document.getElementById('uploadModalTitle');
+            
+            if (!modal || !overlay) return;
+            
+            // Update modal title with field name
+            const fieldName = headerMap[columnIndex] || `Kolom ${columnIndex + 1}`;
+            modalTitle.textContent = `Upload File: ${fieldName}`;
+            
+            // Reset form
+            resetUploadForm();
+            
+            // Show modal
+            overlay.style.display = 'block';
+            modal.style.display = 'block';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function closeUploadModal() {
+            const modal = document.getElementById('uploadModal');
+            const overlay = document.getElementById('uploadModalOverlay');
+            
+            if (!modal || !overlay) return;
+            
+            overlay.style.display = 'none';
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            
+            // Reset form and variables
+            resetUploadForm();
+            currentUploadColumnIndex = null;
+            currentUploadFolderId = null;
+            selectedFile = null;
+        }
+
+        function resetUploadForm() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const uploadStep1 = document.getElementById('uploadStep1');
+            const uploadStep2 = document.getElementById('uploadStep2');
+            const uploadStep3 = document.getElementById('uploadStep3');
+            const saveBtn = document.getElementById('saveUploadBtn');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const uploadButton = document.getElementById('uploadButton');
+            const uploadProgressFill = document.getElementById('uploadProgressFill');
+            const uploadProgressText = document.getElementById('uploadProgressText');
+            
+            if (fileInput) fileInput.value = '';
+            if (fileInfo) fileInfo.style.display = 'none';
+            if (uploadStep1) uploadStep1.classList.remove('completed');
+            if (uploadStep2) {
+                uploadStep2.style.display = 'none';
+                uploadStep2.classList.remove('completed');
+            }
+            if (uploadStep3) {
+                uploadStep3.style.display = 'none';
+                uploadStep3.classList.remove('completed');
+            }
+            if (saveBtn) saveBtn.style.display = 'none';
+            if (uploadProgress) uploadProgress.style.display = 'none';
+            
+            // Reset upload button to initial state
+            if (uploadButton) {
+                uploadButton.disabled = false;
+                uploadButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                `;
+            }
+            
+            // Reset progress bar and text
+            if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+            if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
+            
+            selectedFile = null;
+        }
+
+        function handleFileSelect() {
+            const fileInput = document.getElementById('fileInput');
+            const fileInfo = document.getElementById('fileInfo');
+            const fileInfoName = fileInfo.querySelector('.file-info__name');
+            const fileInfoSize = fileInfo.querySelector('.file-info__size');
+            const uploadStep1 = document.getElementById('uploadStep1');
+            const uploadStep2 = document.getElementById('uploadStep2');
+            
+            if (!fileInput.files || !fileInput.files[0]) {
+                selectedFile = null;
+                fileInfo.style.display = 'none';
+                uploadStep1.classList.remove('completed');
+                uploadStep2.style.display = 'none';
+                return;
+            }
+            
+            selectedFile = fileInput.files[0];
+            
+            // Display file info
+            if (fileInfoName) fileInfoName.textContent = selectedFile.name;
+            if (fileInfoSize) fileInfoSize.textContent = formatFileSize(selectedFile.size);
+            fileInfo.style.display = 'block';
+            
+            // Mark step 1 as completed and show step 2
+            uploadStep1.classList.add('completed');
+            uploadStep2.style.display = 'block';
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function uploadFile() {
+            if (!selectedFile || !currentUploadFolderId || currentUploadColumnIndex === null) {
+                showNotification('Pilih file terlebih dahulu.', 'error');
+                return;
+            }
+
+            if (!google || !google.script || !google.script.run) {
+                showNotification('Fitur upload hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                return;
+            }
+
+            const uploadButton = document.getElementById('uploadButton');
+            const uploadProgress = document.getElementById('uploadProgress');
+            const uploadProgressFill = document.getElementById('uploadProgressFill');
+            const uploadProgressText = document.getElementById('uploadProgressText');
+            
+            // Show loading state
+            uploadButton.disabled = true;
+            uploadButton.innerHTML = '<span>Mengupload...</span>';
+            uploadProgress.style.display = 'block';
+            
+            // Simulate progress (since we can't get real progress from Google Apps Script)
+            let progress = 0;
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 15;
+                if (progress > 90) progress = 90;
+                uploadProgressFill.style.width = progress + '%';
+                uploadProgressText.textContent = `Mengupload... ${Math.round(progress)}%`;
+            }, 200);
+
+            // Convert file to base64 for transfer
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const fileData = {
+                    content: e.target.result.split(',')[1], // Remove data:mime;base64, prefix
+                    name: selectedFile.name,
+                    mimeType: selectedFile.type,
+                    folderId: currentUploadFolderId
+                };
+
+                google.script.run
+                    .withSuccessHandler((result) => {
+                        clearInterval(progressInterval);
+                        uploadProgressFill.style.width = '100%';
+                        uploadProgressText.textContent = 'Upload berhasil!';
+                        
+                        setTimeout(() => {
+                            handleUploadSuccess(result);
+                        }, 500);
+                    })
+                    .withFailureHandler((error) => {
+                        clearInterval(progressInterval);
+                        console.error('Upload error:', error);
+                        
+                        // Reset upload button
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = `
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                            </svg>
+                            Upload File
+                        `;
+                        uploadProgress.style.display = 'none';
+                        
+                        // Reset progress bar and text
+                        uploadProgressFill.style.width = '0%';
+                        uploadProgressText.textContent = 'Mengupload...';
+                        
+                        showNotification('Gagal mengupload file: ' + (error.message || error), 'error');
+                    })
+                    .uploadFileToDrive(fileData);
+            };
+            
+            reader.readAsDataURL(selectedFile);
+        }
+
+        function handleUploadSuccess(result) {
+            console.log('Upload result:', result); // Debug log
+            
+            let fileUrl = null;
+            let fileName = selectedFile ? selectedFile.name : 'Unknown file';
+            
+            // Handle different response formats
+            if (typeof result === 'string') {
+                // If result is just a URL string
+                fileUrl = result;
+            } else if (result && typeof result === 'object') {
+                // If result is an object, try to extract URL
+                fileUrl = result.url || result.fileUrl || result.getUrl || null;
+                if (result.fileName) fileName = result.fileName;
+            }
+            
+            console.log('Extracted file URL:', fileUrl); // Debug log
+            
+            if (!fileUrl || fileUrl === '') {
+                console.error('No URL found in result:', result);
+                showNotification('Upload berhasil tapi URL tidak ditemukan. Coba refresh halaman.', 'error');
+                
+                // Reset upload button untuk retry
+                const uploadButton = document.getElementById('uploadButton');
+                if (uploadButton) {
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                        </svg>
+                        Upload File
+                    `;
+                }
+                
+                const uploadProgress = document.getElementById('uploadProgress');
+                if (uploadProgress) uploadProgress.style.display = 'none';
+                
+                // Reset progress bar and text
+                const uploadProgressFill = document.getElementById('uploadProgressFill');
+                const uploadProgressText = document.getElementById('uploadProgressText');
+                if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+                if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
+                
+                return;
+            }
+
+            const uploadStep2 = document.getElementById('uploadStep2');
+            const uploadStep3 = document.getElementById('uploadStep3');
+            const uploadResult = document.getElementById('uploadResult');
+            const uploadResultFile = uploadResult.querySelector('.upload-result__file');
+            const uploadResultUrl = uploadResult.querySelector('.upload-result__url');
+            const saveBtn = document.getElementById('saveUploadBtn');
+            
+            // Hide step 2, show step 3
+            if (uploadStep2) uploadStep2.style.display = 'none';
+            if (uploadStep3) {
+                uploadStep3.style.display = 'block';
+                uploadStep3.classList.add('completed');
+            }
+            
+            // Show file result
+            if (uploadResultFile) uploadResultFile.textContent = `✅ ${fileName}`;
+            if (uploadResultUrl) uploadResultUrl.textContent = fileUrl;
+            
+            // Show finish button
+            if (saveBtn) saveBtn.style.display = 'inline-block';
+            
+            // Update the spreadsheet with new URL
+            updateSpreadsheetWithNewFile(fileUrl);
+        }
+
+        function updateSpreadsheetWithNewFile(fileUrl) {
+            console.log('Updating spreadsheet with URL:', fileUrl); // Debug log
+            
+            if (currentRowIndex === null || currentUploadColumnIndex === null) {
+                console.error('Invalid data for update:', { currentRowIndex, currentUploadColumnIndex });
+                showNotification('Data tidak valid untuk update.', 'error');
+                return;
+            }
+
+            const updates = { [currentUploadColumnIndex]: fileUrl };
+            console.log('Spreadsheet updates:', updates); // Debug log
+
+            if (!google || !google.script || !google.script.run) {
+                console.error('Google Apps Script not available');
+                showNotification('Google Apps Script tidak tersedia. URL: ' + fileUrl, 'error');
+                return;
+            }
+
+            google.script.run
+                .withSuccessHandler((updateResult) => {
+                    console.log('Spreadsheet update result:', updateResult); // Debug log
+                    
+                    // Update local data table
+                    if (dataTable && currentRowDataIndex !== null) {
+                        dataTable.setValue(currentRowDataIndex, currentUploadColumnIndex, fileUrl);
+                    }
+
+                    // Update the "Lihat File" link
+                    updateViewFileLink(currentUploadColumnIndex, fileUrl);
+                    
+                    const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
+                    showNotification(`${fieldName} berhasil diupload dan tersimpan. Link "Lihat File" telah diperbarui.`, 'success');
+                    
+                    // Close upload modal after a short delay to show the updated link
+                    setTimeout(() => {
+                        finalizeUpload();
+                    }, 2000);
+                })
+                .withFailureHandler((error) => {
+                    console.error('Spreadsheet update error:', error);
+                    showNotification('File berhasil diupload ke: ' + fileUrl + ' tapi gagal update database. Error: ' + error.message, 'error');
+                })
+                .updateRowFields(currentRowIndex, updates);
+        }
+
+        function finalizeUpload() {
+            // Show final notification that file is ready to view
+            if (currentUploadColumnIndex !== null) {
+                const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
+                showNotification(`File ${fieldName} siap dilihat dengan link yang telah diperbarui.`, 'success');
+            }
+            closeUploadModal();
+        }
+
+        function validateUploadUrl() {
+            // This function is no longer needed for direct upload
+            // Keeping for backward compatibility
+        }
+
+        function saveUploadedFile() {
+            // This function is replaced by updateSpreadsheetWithNewFile
+            // Keeping for backward compatibility
+            finalizeUpload();
+        }
+
+        function updateViewFileLink(columnIndex, newUrl) {
+            if (!newUrl) return;
+            
+            let fileId = null;
+            
+            // Try multiple patterns to extract file ID from various Google Drive URL formats
+            const patterns = [
+                /\/file\/d\/([a-zA-Z0-9_-]+)/, // https://drive.google.com/file/d/FILE_ID/...
+                /id=([a-zA-Z0-9_-]+)/, // ?id=FILE_ID
+                /\/open\?id=([a-zA-Z0-9_-]+)/, // /open?id=FILE_ID
+                /\/view\?id=([a-zA-Z0-9_-]+)/, // /view?id=FILE_ID
+                /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/ // General pattern for 25+ char IDs
+            ];
+            
+            for (const pattern of patterns) {
+                const match = newUrl.match(pattern);
+                if (match && match[1]) {
+                    fileId = match[1];
+                    break;
+                }
+            }
+
+            if (fileId) {
+                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                const displayDiv = document.getElementById(`file_display_${columnIndex}`);
+                
+                console.log('Updating view file link for column:', columnIndex, 'with URL:', embedUrl); // Debug log
+                
+                if (displayDiv) {
+                    const linkElement = displayDiv.querySelector('.lihat-link');
+                    if (linkElement) {
+                        // Update onclick attribute
+                        linkElement.setAttribute('onclick', `openPopup('${embedUrl}')`);
+                        console.log('Updated lihat-link onclick to:', `openPopup('${embedUrl}')`); // Debug log
+                        
+                        // Also update visual indicator if needed
+                        linkElement.style.color = '#007bff'; // Blue color to indicate it's updated
+                        
+                        // Add a brief flash effect to show it's been updated
+                        linkElement.style.backgroundColor = '#e7f3ff';
+                        setTimeout(() => {
+                            linkElement.style.backgroundColor = '';
+                        }, 1000);
+                        
+                        // Update the title to show it's been updated
+                        linkElement.setAttribute('title', 'File telah diperbarui - Klik untuk melihat');
+                    } else {
+                        console.log('Link element not found in displayDiv'); // Debug log
+                    }
+                } else {
+                    console.log('DisplayDiv not found for column:', columnIndex); // Debug log
+                }
+            } else {
+                console.log('Could not extract file ID from URL:', newUrl); // Debug log
+            }
+        }
+
+        // Setup upload modal
+        function setupUploadModal() {
+            const overlay = document.getElementById('uploadModalOverlay');
+            if (overlay) {
+                overlay.addEventListener('click', closeUploadModal);
+            }
+        }
+
+        // Add to init function
+        function initUpload() {
+            setupUploadModal();
+        }
+
+
+    </script>
+
+    </div> <!-- End main-content -->
+
+</body>
+
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
