@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html>
 
 <head>
@@ -1476,7 +1476,7 @@
             "Keterangan"
         ];
         const EDITABLE_COLUMNS = new Set([1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
-        const VISIBLE_COLUMNS = [0, 1, 2, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 19, 21, 23, 25, 27, 29, 31];
+        const VISIBLE_COLUMNS = [6, 7, 11, 12, 14, 17, 19, 21, 23, 25, 27, 29];
         
         // Columns that require single quote prefix: No. Sertifikat, Tgl. Sertifikat, NIP, TMT Kenaikan Pangkat Terakhir, Nilai PAK Konversi Terakhir
         const SINGLE_QUOTE_PREFIX_COLUMNS = new Set([4, 5, 6, 10, 15]);
@@ -3018,7 +3018,7 @@
             }
             
             // Show file result
-            if (uploadResultFile) uploadResultFile.textContent = `✅ ${fileName}`;
+            if (uploadResultFile) uploadResultFile.textContent = `âœ… ${fileName}`;
             if (uploadResultUrl) uploadResultUrl.textContent = fileUrl;
             
             // Show finish button
@@ -3171,6 +3171,7 @@
 </body>
 
 </html>
+
 
 
 
