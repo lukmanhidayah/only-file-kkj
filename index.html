@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 
 <head>
@@ -6,7 +6,7 @@
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     <script type="text/javascript">
         // Show loading screen immediately
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // The loading screen is already visible via CSS (body.loading class)
             // This ensures it stays visible during script loading
         });
@@ -991,6 +991,7 @@
             background: rgba(0, 0, 0, 0.4);
             z-index: 1100;
         }
+
         .prefill-modal {
             display: none;
             position: fixed;
@@ -1005,6 +1006,7 @@
             z-index: 1101;
             overflow: hidden;
         }
+
         .prefill-modal__header {
             display: flex;
             align-items: center;
@@ -1013,12 +1015,14 @@
             border-bottom: 1px solid #eee;
             background: #f8fafc;
         }
+
         .prefill-modal__title {
             margin: 0;
             font-size: 1.05rem;
             font-weight: 600;
             color: #111827;
         }
+
         .prefill-modal__close {
             border: none;
             background: transparent;
@@ -1027,23 +1031,28 @@
             cursor: pointer;
             color: #6b7280;
         }
+
         .prefill-modal__close:hover {
             color: #111827;
         }
+
         .prefill-modal__body {
             padding: 20px;
         }
+
         .prefill-modal__body p {
             margin-top: 0;
             margin-bottom: 12px;
             color: #4b5563;
             font-size: 0.95rem;
         }
+
         .prefill-modal__options {
             display: flex;
             flex-direction: column;
             gap: 10px;
         }
+
         .prefill-option {
             border: 1px solid #e5e7eb;
             border-radius: 8px;
@@ -1057,41 +1066,50 @@
             flex-direction: column;
             gap: 4px;
         }
+
         .prefill-option:hover {
             border-color: #2563eb;
             box-shadow: 0 6px 16px rgba(37, 99, 235, 0.15);
             transform: translateY(-1px);
         }
+
         .prefill-option:disabled {
             cursor: not-allowed;
             opacity: 0.7;
             transform: none;
             box-shadow: none;
         }
+
         .prefill-option__title {
             font-weight: 600;
             color: #111827;
         }
+
         .prefill-option__url {
             font-size: 0.8rem;
             color: #2563eb;
             word-break: break-all;
         }
+
         .prefill-modal__status {
             margin-top: 16px;
             font-size: 0.9rem;
             color: #4b5563;
         }
+
         .prefill-modal__status--success {
             color: #16a34a;
         }
+
         .prefill-modal__status--error {
             color: #dc2626;
         }
+
         .prefill-modal__link {
             margin-top: 12px;
             font-size: 0.9rem;
         }
+
         .prefill-modal__link a {
             color: #2563eb;
             text-decoration: underline;
@@ -1213,6 +1231,7 @@
         .view-btn:hover {
             background: #4f46e5;
         }
+
         @media (max-width: 640px) {
             .prefill-modal {
                 width: 95vw;
@@ -1262,22 +1281,31 @@
         }
 
         @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
         }
 
         @keyframes fade {
-            0%, 100% { opacity: 0.5; }
-            50% { opacity: 1; }
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
         }
 
         /* Hide main content initially */
         body.loading .main-content {
             display: none;
         }
-
-
-
     </style>
 </head>
 
@@ -1291,340 +1319,343 @@
 
     <!-- Main Content -->
     <div class="main-content">
-    <h2>Cari Data NIP</h2>
-    <div id="searchBox">
-        <input type="text" id="nipInput" placeholder="Masukkan NIP">
-        <button onclick="searchNIP()">Cari</button>
-    </div>
-    <div id="result"></div>
-
-    <div class="popup-overlay" id="popupOverlay"></div>
-    <div class="popup" id="popupBox">
-        <div class="popup-header" id="popupHeader">
-            <div class="popup-title">Pratinjau Berkas</div>
-            <span class="popup-close" onclick="closePopup()">X</span>
+        <h2>Cari Data NIP</h2>
+        <div id="searchBox">
+            <input type="text" id="nipInput" placeholder="Masukkan NIP">
+            <button onclick="searchNIP()">Cari</button>
         </div>
-        <div class="popup-body">
-            <div id="popupContent"></div>
-        </div>
-    </div>
+        <div id="result"></div>
 
-    <!-- Preview Modal -->
-    <div class="preview-overlay" id="previewOverlay"></div>
-    <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle"
-        aria-hidden="true">
-        <div class="preview-modal__header">
-            <h3 class="preview-modal__title" id="previewModalTitle">Pratinjau Perubahan</h3>
-            <button type="button" class="preview-modal__close" onclick="closePreviewModal()"
-                aria-label="Tutup pratinjau">&times;</button>
-        </div>
-        <div class="preview-modal__body">
-            <p>Anda akan mengubah bidang berikut:</p>
-            <ul class="preview-changes" id="previewChangesList"></ul>
-        </div>
-        <div class="preview-modal__footer">
-            <button type="button" class="preview-modal__action preview-modal__action--cancel"
-                onclick="closePreviewModal()">Batal</button>
-            <button type="button" class="preview-modal__action preview-modal__action--confirm" id="confirmSaveBtn"
-                onclick="confirmSaveEdits()">Simpan Perubahan</button>
-        </div>
-    </div>
-
-
-    <div class="prefill-modal-overlay" id="prefillModalOverlay"></div>
-
-    <div class="prefill-modal" id="prefillModal" role="dialog" aria-modal="true" aria-labelledby="prefillModalTitle" aria-hidden="true">
-
-        <div class="prefill-modal__header">
-
-            <h3 class="prefill-modal__title" id="prefillModalTitle">Generate Link Google Form</h3>
-
-            <button type="button" class="prefill-modal__close" onclick="closePrefillModal()" aria-label="Tutup modal generate link">&times;</button>
-
+        <div class="popup-overlay" id="popupOverlay"></div>
+        <div class="popup" id="popupBox">
+            <div class="popup-header" id="popupHeader">
+                <div class="popup-title">Pratinjau Berkas</div>
+                <span class="popup-close" onclick="closePopup()">X</span>
+            </div>
+            <div class="popup-body">
+                <div id="popupContent"></div>
+            </div>
         </div>
 
-        <div class="prefill-modal__body">
+        <!-- Preview Modal -->
+        <div class="preview-overlay" id="previewOverlay"></div>
+        <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle"
+            aria-hidden="true">
+            <div class="preview-modal__header">
+                <h3 class="preview-modal__title" id="previewModalTitle">Pratinjau Perubahan</h3>
+                <button type="button" class="preview-modal__close" onclick="closePreviewModal()"
+                    aria-label="Tutup pratinjau">&times;</button>
+            </div>
+            <div class="preview-modal__body">
+                <p>Anda akan mengubah bidang berikut:</p>
+                <ul class="preview-changes" id="previewChangesList"></ul>
+            </div>
+            <div class="preview-modal__footer">
+                <button type="button" class="preview-modal__action preview-modal__action--cancel"
+                    onclick="closePreviewModal()">Batal</button>
+                <button type="button" class="preview-modal__action preview-modal__action--confirm" id="confirmSaveBtn"
+                    onclick="confirmSaveEdits()">Simpan Perubahan</button>
+            </div>
+        </div>
 
-            <p id="prefillInstructions">Pilih jenis formulir untuk membuat tautan autofill:</p>
 
-            <div class="prefill-modal__options" id="prefillOptionsContainer"></div>
+        <div class="prefill-modal-overlay" id="prefillModalOverlay"></div>
 
-            <div class="prefill-modal__status" id="prefillModalStatus"></div>
+        <div class="prefill-modal" id="prefillModal" role="dialog" aria-modal="true" aria-labelledby="prefillModalTitle"
+            aria-hidden="true">
 
-            <div class="prefill-modal__link" id="prefillModalLinkContainer"></div>
+            <div class="prefill-modal__header">
 
-            <div class="prefill-modal__documents" id="prefillModalDocumentsContainer" style="display: none;">
-                <div class="prefill-modal__documents-header">
-                    <h4>Semua Dokumen Tersedia:</h4>
-                </div>
-                <div class="prefill-modal__documents-list" id="prefillModalDocumentsList"></div>
+                <h3 class="prefill-modal__title" id="prefillModalTitle">Generate Link Google Form</h3>
+
+                <button type="button" class="prefill-modal__close" onclick="closePrefillModal()"
+                    aria-label="Tutup modal generate link">&times;</button>
+
             </div>
 
-        </div>
+            <div class="prefill-modal__body">
 
-    </div>
+                <p id="prefillInstructions">Pilih jenis formulir untuk membuat tautan autofill:</p>
 
-    <!-- Upload Modal -->
-    <div class="upload-modal-overlay" id="uploadModalOverlay"></div>
-    <div class="upload-modal" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle" aria-hidden="true">
-        <div class="upload-modal__header">
-            <h3 class="upload-modal__title" id="uploadModalTitle">Upload File Baru</h3>
-            <button type="button" class="upload-modal__close" onclick="closeUploadModal()" aria-label="Tutup upload modal">&times;</button>
-        </div>
-        <div class="upload-modal__body">
-            <div class="upload-step" id="uploadStep1">
-                <div class="upload-step__title">
-                    <span>1.</span>
-                    <span>Pilih File untuk Diupload</span>
-                </div>
-                <div class="upload-step__description">
-                    Pilih file dari komputer Anda untuk diupload ke Google Drive.
-                </div>
-                <input type="file" 
-                       id="fileInput" 
-                       class="upload-file-input" 
-                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx"
-                       onchange="handleFileSelect()">
-                <div class="file-info" id="fileInfo" style="display: none;">
-                    <div class="file-info__name"></div>
-                    <div class="file-info__size"></div>
-                </div>
-            </div>
-            
-            <div class="upload-step" id="uploadStep2" style="display: none;">
-                <div class="upload-step__title">
-                    <span>2.</span>
-                    <span>Upload ke Google Drive</span>
-                </div>
-                <div class="upload-step__description">
-                    Klik tombol di bawah untuk mengupload file ke Google Drive.
-                </div>
-                <button type="button" class="upload-step__button" id="uploadButton" onclick="uploadFile()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
-                    </svg>
-                    Upload File
-                </button>
-                <div class="upload-progress" id="uploadProgress" style="display: none;">
-                    <div class="upload-progress__bar">
-                        <div class="upload-progress__fill" id="uploadProgressFill"></div>
+                <div class="prefill-modal__options" id="prefillOptionsContainer"></div>
+
+                <div class="prefill-modal__status" id="prefillModalStatus"></div>
+
+                <div class="prefill-modal__link" id="prefillModalLinkContainer"></div>
+
+                <div class="prefill-modal__documents" id="prefillModalDocumentsContainer" style="display: none;">
+                    <div class="prefill-modal__documents-header">
+                        <h4>Semua Dokumen Tersedia:</h4>
                     </div>
-                    <div class="upload-progress__text" id="uploadProgressText">Mengupload...</div>
+                    <div class="prefill-modal__documents-list" id="prefillModalDocumentsList"></div>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- Upload Modal -->
+        <div class="upload-modal-overlay" id="uploadModalOverlay"></div>
+        <div class="upload-modal" id="uploadModal" role="dialog" aria-modal="true" aria-labelledby="uploadModalTitle"
+            aria-hidden="true">
+            <div class="upload-modal__header">
+                <h3 class="upload-modal__title" id="uploadModalTitle">Upload File Baru</h3>
+                <button type="button" class="upload-modal__close" onclick="closeUploadModal()"
+                    aria-label="Tutup upload modal">&times;</button>
+            </div>
+            <div class="upload-modal__body">
+                <div class="upload-step" id="uploadStep1">
+                    <div class="upload-step__title">
+                        <span>1.</span>
+                        <span>Pilih File untuk Diupload</span>
+                    </div>
+                    <div class="upload-step__description">
+                        Pilih file dari komputer Anda untuk diupload ke Google Drive.
+                    </div>
+                    <input type="file" id="fileInput" class="upload-file-input"
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.xls,.xlsx" onchange="handleFileSelect()">
+                    <div class="file-info" id="fileInfo" style="display: none;">
+                        <div class="file-info__name"></div>
+                        <div class="file-info__size"></div>
+                    </div>
+                </div>
+
+                <div class="upload-step" id="uploadStep2" style="display: none;">
+                    <div class="upload-step__title">
+                        <span>2.</span>
+                        <span>Upload ke Google Drive</span>
+                    </div>
+                    <div class="upload-step__description">
+                        Klik tombol di bawah untuk mengupload file ke Google Drive.
+                    </div>
+                    <button type="button" class="upload-step__button" id="uploadButton" onclick="uploadFile()">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z" />
+                        </svg>
+                        Upload File
+                    </button>
+                    <div class="upload-progress" id="uploadProgress" style="display: none;">
+                        <div class="upload-progress__bar">
+                            <div class="upload-progress__fill" id="uploadProgressFill"></div>
+                        </div>
+                        <div class="upload-progress__text" id="uploadProgressText">Mengupload...</div>
+                    </div>
+                </div>
+
+                <div class="upload-step" id="uploadStep3" style="display: none;">
+                    <div class="upload-step__title">
+                        <span>3.</span>
+                        <span>Upload Berhasil!</span>
+                    </div>
+                    <div class="upload-step__description">
+                        File berhasil diupload ke Google Drive. URL akan otomatis tersimpan.
+                    </div>
+                    <div class="upload-result" id="uploadResult">
+                        <div class="upload-result__file"></div>
+                        <div class="upload-result__url"></div>
+                    </div>
                 </div>
             </div>
-            
-            <div class="upload-step" id="uploadStep3" style="display: none;">
-                <div class="upload-step__title">
-                    <span>3.</span>
-                    <span>Upload Berhasil!</span>
-                </div>
-                <div class="upload-step__description">
-                    File berhasil diupload ke Google Drive. URL akan otomatis tersimpan.
-                </div>
-                <div class="upload-result" id="uploadResult">
-                    <div class="upload-result__file"></div>
-                    <div class="upload-result__url"></div>
-                </div>
+            <div class="upload-modal__footer">
+                <button type="button" class="upload-modal__action upload-modal__action--cancel"
+                    onclick="closeUploadModal()">Batal</button>
+                <button type="button" class="upload-modal__action upload-modal__action--save" id="saveUploadBtn"
+                    onclick="finalizeUpload()" style="display: none;">
+                    Selesai
+                </button>
             </div>
         </div>
-        <div class="upload-modal__footer">
-            <button type="button" class="upload-modal__action upload-modal__action--cancel" onclick="closeUploadModal()">Batal</button>
-            <button type="button" class="upload-modal__action upload-modal__action--save" id="saveUploadBtn" onclick="finalizeUpload()" style="display: none;">
-                Selesai
-            </button>
-        </div>
-    </div>
 
 
 
-    <script type="text/javascript">
-        google.charts.load('current', { 'packages': ['table'] });
-        google.charts.setOnLoadCallback(init);
+        <script type="text/javascript">
+            google.charts.load('current', { 'packages': ['table'] });
+            google.charts.setOnLoadCallback(init);
 
-        const headerMap = [
-            "Waktu",
-            "Jenis Usulan",
-            "Sertifikat UKKJ",
-            "Status Sertifikat LULUS UKKJ",
-            "No. Sertifikat",
-            "Tgl. Sertifikat",
-            "NIP",
-            "Nama Lengkap (Berikut Gelar)",
-            "Pangkat",
-            "Golongan/Ruang",
-            "TMT Kenaikan Pangkat Terakhir",
-            "Satuan Kerja",
-            "Unit Kerja",
-            "Provinsi",
-            "Jabatan Lama",
-            "Nilai PAK Konversi Terakhir",
-            "Jabatan Baru",
-            "Surat Pengantar dan SPTJM dari Kepala Kantor",
-            "Status Surat Pengantar dan SPTJM dari Kepala Kantor",
-            "SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
-            "Status SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
-            "PAK Konversi Terakhir",
-            "Status PAK Konversi Terakhir",
-            "Ijazah dan Transkrip nilai terakhir",
-            "Status Ijazah dan Transkrip nilai terakhir",
-            "Penilaian SKP 2 tahun terakhir",
-            "Status Penilaian SKP 2 tahun terakhir",
-            "SUKET TUBEL",
-            "Status SUKET TUBEL",
-            "SUKET HUKDIS",
-            "Status SUKET HUKDIS",
-            "Keterangan"
-        ];
-        const EDITABLE_COLUMNS = new Set([1, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
-        const VISIBLE_COLUMNS = [6, 7, 11, 12, 14, 17, 19, 21, 23, 25, 27, 29];
-        
-        // Columns that require single quote prefix: No. Sertifikat, Tgl. Sertifikat, NIP, TMT Kenaikan Pangkat Terakhir, Nilai PAK Konversi Terakhir
-        const SINGLE_QUOTE_PREFIX_COLUMNS = new Set([4, 5, 6, 10, 15]);
+            const headerMap = [
+                "Waktu",
+                "Jenis Usulan",
+                "Sertifikat UKKJ",
+                "Status Sertifikat LULUS UKKJ",
+                "No. Sertifikat",
+                "Tgl. Sertifikat",
+                "NIP",
+                "Nama Lengkap (Berikut Gelar)",
+                "Pangkat",
+                "Golongan/Ruang",
+                "TMT Kenaikan Pangkat Terakhir",
+                "Satuan Kerja",
+                "Unit Kerja",
+                "Provinsi",
+                "Jabatan Lama",
+                "Nilai PAK Konversi Terakhir",
+                "Jabatan Baru",
+                "Surat Pengantar dan SPTJM dari Kepala Kantor",
+                "Status Surat Pengantar dan SPTJM dari Kepala Kantor",
+                "SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
+                "Status SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir",
+                "PAK Konversi Terakhir",
+                "Status PAK Konversi Terakhir",
+                "Ijazah dan Transkrip nilai terakhir",
+                "Status Ijazah dan Transkrip nilai terakhir",
+                "Penilaian SKP 2 tahun terakhir",
+                "Status Penilaian SKP 2 tahun terakhir",
+                "SUKET TUBEL",
+                "Status SUKET TUBEL",
+                "SUKET HUKDIS",
+                "Status SUKET HUKDIS",
+                "Keterangan"
+            ];
+            const EDITABLE_COLUMNS = new Set([1, 4, 5, 8, 9, 10, 13, 15, 16]);
+            const VISIBLE_COLUMNS = [6, 7, 11, 12, 14, 17, 19, 21, 23, 25, 27, 29];
 
-
-        // Upload link mapping for different file types
-        const UPLOAD_LINKS_MAP = {
-            2: 'https://drive.google.com/drive/folders/1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
-            17: 'https://drive.google.com/drive/folders/1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
-            19: 'https://drive.google.com/drive/folders/1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
-            21: 'https://drive.google.com/drive/folders/1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
-            23: 'https://drive.google.com/drive/folders/1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
-            25: 'https://drive.google.com/drive/folders/1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
-            27: 'https://drive.google.com/drive/folders/1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
-            29: 'https://drive.google.com/drive/folders/1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
-        };
-
-        // Folder ID mapping for upload functionality
-        const UPLOAD_FOLDER_IDS = {
-            2: '1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
-            17: '1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
-            19: '1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
-            21: '1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
-            23: '1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
-            25: '1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
-            27: '1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
-            29: '1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
-        };
-
-        const PREFILL_FORM_OPTIONS = {
-
-            pendisGuruMadrasah: { label: 'Link Pendis Guru Madrasah', url: 'https://docs.google.com/forms/d/e/1FAIpQLSd3eHdh50pX7awV7tJ9pRj84ik7MwRXlVPWEmxwSLLOjjrrNQ/viewform' },
-
-            pendisGuruPai: { label: 'Link Pendis Guru PAI', url: 'https://docs.google.com/forms/d/e/1FAIpQLSeHlMDmPURIXer6BDzvDjWi2d7tLxS36ja2nJyF831M5SVL5w/viewform' },
-
-            kristen: { label: 'Link Kristen', url: 'https://docs.google.com/forms/d/e/1FAIpQLSegMFQYpluo8ephxSeSnmBQs1I8e2MtAVE6eQGFfRj4XeQQaA/viewform' },
-
-            katolik: { label: 'Link Katolik', url: 'https://docs.google.com/forms/d/1oPGwdvnYktOaeKQroPKX9STipnlNL52UvqU2s_N9r_0/viewform?edit_requested=true' },
-
-            hindu: { label: 'Link Hindu', url: 'https://docs.google.com/forms/d/e/1FAIpQLSdcicvfjkyWFSNRfJF1B2eLwBP2OEF3IlUYzDNkVciFuMDI4Q/viewform' },
-
-            buddha: { label: 'Link Buddha', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc9Eu2pW1KhpPxgLeA5G7sMWHYJyJ1Fvr9u706-QNPlL__H6Q/viewform' }
-
-        };
+            // Columns that require single quote prefix: No. Sertifikat, Tgl. Sertifikat, NIP, TMT Kenaikan Pangkat Terakhir, Nilai PAK Konversi Terakhir
+            const SINGLE_QUOTE_PREFIX_COLUMNS = new Set([4, 5, 6, 10, 15]);
 
 
+            // Upload link mapping for different file types
+            const UPLOAD_LINKS_MAP = {
+                2: 'https://drive.google.com/drive/folders/1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
+                17: 'https://drive.google.com/drive/folders/1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
+                19: 'https://drive.google.com/drive/folders/1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
+                21: 'https://drive.google.com/drive/folders/1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
+                23: 'https://drive.google.com/drive/folders/1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
+                25: 'https://drive.google.com/drive/folders/1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
+                27: 'https://drive.google.com/drive/folders/1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
+                29: 'https://drive.google.com/drive/folders/1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
+            };
 
-        let dataTable;
-        let currentRowIndex = null;
-        let currentRowDataIndex = null;
-        let isSaving = false;
-        let isPrefilling = false;
-        let pendingChanges = null;
+            // Folder ID mapping for upload functionality
+            const UPLOAD_FOLDER_IDS = {
+                2: '1_EuHAesCw0pQe2ANpBhuC0uWWPLs_yhGKII6tBhtBAQw-3Q-IzCJpiarIjb6wR_oyln1TDdF', // Sertifikat UKKJ
+                17: '1-purrtZPyKDSqmXNmG1-RKq__PNkJQCZBjWX4kI_-UQmuHeIZL-iExXLTTB9Mdhj8GOmnRpv', // Surat Pengantar dan SPTJM
+                19: '1DaJ1kmf2UBNkmBNjrDrdHy3ivkbcYRey1WctZIht7MFebootADwrIt_hkm31KHH49v-8Snoe', // SK CPNS, SK PNS, SK Jabatan Terakhir, dan SK Pangkat Terakhir
+                21: '1CKKIj3cOZ7i-Vl6H-LbzZDALW2b7ys8LHZdJb2DkpVcukoXTeiPh17HUS48zNnvDE6pCpejU', // PAK Konversi Terakhir
+                23: '1oBy2pyteJC8akIrqZiidG0fmxCmraNujhDr1zKU0p3y5Z0MKh8C7QXg8oUocu2GgSgXBvMvC', // Ijazah dan Transkrip nilai terakhir
+                25: '1d5xENqACl4W84_0yvW244Ci80XL1d_imi573ywI_Zi0Wb3xiTzsUmuuzpmTALvNmveeJASwg', // Penilaian SKP 2 tahun terakhir
+                27: '1jlOYqTuvZtTuLWlDKGcnoYA4spy13v8lg4M18sx2J0EDBDr164YT_YLlt4JHnyrRBQ6gnadS', // SUKET TUBEL
+                29: '1KMNa_4iN4U8ZVcAKjWrREkjvFiciK8BJ66XQbO5_-zR0X2bujUgb_HSlze8tAVhvBbWsCkR8' // SUKET HUKDIS
+            };
 
-        function init() {
-            const query = new google.visualization.Query(
-                "https://docs.google.com/spreadsheets/d/1DZbPotFtHoPWVnG6N3kk1J8XeOmwUo_K1v-ZXBpbVrA/gviz/tq?sheet=DBClear"
-            );
-            query.send(handleQueryResponse);
-            setupDrag();
-            setupPreviewModal();
-            setupPrefillModal();
-            initUpload();
-        }
+            const PREFILL_FORM_OPTIONS = {
 
-        function hideLoadingScreen() {
-            const loadingScreen = document.getElementById('loadingScreen');
-            const body = document.body;
-            
-            if (loadingScreen) {
-                // Add fade out animation
-                loadingScreen.style.opacity = '0';
-                loadingScreen.style.transition = 'opacity 0.5s ease-out';
-                
-                // Remove loading class from body to show main content
-                body.classList.remove('loading');
-                
-                // Remove loading screen after animation
-                setTimeout(() => {
-                    loadingScreen.style.display = 'none';
-                }, 500);
+                pendisGuruMadrasah: { label: 'Link Pendis Guru Madrasah', url: 'https://docs.google.com/forms/d/e/1FAIpQLSd3eHdh50pX7awV7tJ9pRj84ik7MwRXlVPWEmxwSLLOjjrrNQ/viewform' },
+
+                pendisGuruPai: { label: 'Link Pendis Guru PAI', url: 'https://docs.google.com/forms/d/e/1FAIpQLSeHlMDmPURIXer6BDzvDjWi2d7tLxS36ja2nJyF831M5SVL5w/viewform' },
+
+                kristen: { label: 'Link Kristen', url: 'https://docs.google.com/forms/d/e/1FAIpQLSegMFQYpluo8ephxSeSnmBQs1I8e2MtAVE6eQGFfRj4XeQQaA/viewform' },
+
+                katolik: { label: 'Link Katolik', url: 'https://docs.google.com/forms/d/1oPGwdvnYktOaeKQroPKX9STipnlNL52UvqU2s_N9r_0/viewform?edit_requested=true' },
+
+                hindu: { label: 'Link Hindu', url: 'https://docs.google.com/forms/d/e/1FAIpQLSdcicvfjkyWFSNRfJF1B2eLwBP2OEF3IlUYzDNkVciFuMDI4Q/viewform' },
+
+                buddha: { label: 'Link Buddha', url: 'https://docs.google.com/forms/d/e/1FAIpQLSc9Eu2pW1KhpPxgLeA5G7sMWHYJyJ1Fvr9u706-QNPlL__H6Q/viewform' }
+
+            };
+
+
+
+            let dataTable;
+            let currentRowIndex = null;
+            let currentRowDataIndex = null;
+            let isSaving = false;
+            let isPrefilling = false;
+            let pendingChanges = null;
+
+            function init() {
+                const query = new google.visualization.Query(
+                    "https://docs.google.com/spreadsheets/d/1DZbPotFtHoPWVnG6N3kk1J8XeOmwUo_K1v-ZXBpbVrA/gviz/tq?sheet=DBClear"
+                );
+                query.send(handleQueryResponse);
+                setupDrag();
+                setupPreviewModal();
+                setupPrefillModal();
+                initUpload();
             }
-        }
 
-        function handleQueryResponse(response) {
-            if (response.isError()) {
-                alert('Error: ' + response.getMessage());
-                // Hide loading screen even on error
+            function hideLoadingScreen() {
+                const loadingScreen = document.getElementById('loadingScreen');
+                const body = document.body;
+
+                if (loadingScreen) {
+                    // Add fade out animation
+                    loadingScreen.style.opacity = '0';
+                    loadingScreen.style.transition = 'opacity 0.5s ease-out';
+
+                    // Remove loading class from body to show main content
+                    body.classList.remove('loading');
+
+                    // Remove loading screen after animation
+                    setTimeout(() => {
+                        loadingScreen.style.display = 'none';
+                    }, 500);
+                }
+            }
+
+            function handleQueryResponse(response) {
+                if (response.isError()) {
+                    alert('Error: ' + response.getMessage());
+                    // Hide loading screen even on error
+                    hideLoadingScreen();
+                    return;
+                }
+                dataTable = response.getDataTable();
+                // Hide loading screen after data is loaded
                 hideLoadingScreen();
-                return;
             }
-            dataTable = response.getDataTable();
-            // Hide loading screen after data is loaded
-            hideLoadingScreen();
-        }
 
-        function searchNIP() {
-            const nipInput = document.getElementById('nipInput');
-            const nip = nipInput.value.trim();
-            const resultDiv = document.getElementById('result');
-            resultDiv.innerHTML = '';
+            function searchNIP() {
+                const nipInput = document.getElementById('nipInput');
+                const nip = nipInput.value.trim();
+                const resultDiv = document.getElementById('result');
+                resultDiv.innerHTML = '';
 
-            currentRowIndex = null;
-            currentRowDataIndex = null;
-            resetSaveState();
-            resetPrefillUI();
+                currentRowIndex = null;
+                currentRowDataIndex = null;
+                resetSaveState();
+                resetPrefillUI();
 
-            if (!nip || !dataTable) return;
+                if (!nip || !dataTable) return;
 
-            let found = false;
-            const nipColIndex = 6;
+                let found = false;
+                const nipColIndex = 6;
 
-            for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
-                const nipValue = (dataTable.getFormattedValue(i, nipColIndex) || '').trim();
+                for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
+                    const nipValue = (dataTable.getFormattedValue(i, nipColIndex) || '').trim();
 
-                const normalizedNipValue = nipValue.startsWith("'") ? nipValue.substring(1) : nipValue;
-                const normalizedNip = nip.startsWith("'") ? nip.substring(1) : nip;
-                if (normalizedNipValue === normalizedNip) {
-                    found = true;
-                    const rowIndexInSheet = i + 2;
-                    currentRowIndex = rowIndexInSheet;
-                    currentRowDataIndex = i;
+                    const normalizedNipValue = nipValue.startsWith("'") ? nipValue.substring(1) : nipValue;
+                    const normalizedNip = nip.startsWith("'") ? nip.substring(1) : nip;
+                    if (normalizedNipValue === normalizedNip) {
+                        found = true;
+                        const rowIndexInSheet = i + 2;
+                        currentRowIndex = rowIndexInSheet;
+                        currentRowDataIndex = i;
 
-                    const htmlParts = [];
+                        const htmlParts = [];
 
-                    for (let j = 0; j < dataTable.getNumberOfColumns(); j++) {
-                        if (!VISIBLE_COLUMNS.includes(j)) continue;
+                        for (let j = 0; j < dataTable.getNumberOfColumns(); j++) {
+                            if (!VISIBLE_COLUMNS.includes(j)) continue;
 
-                        const rawValue = dataTable.getValue(i, j);
-                        const displayLabel = headerMap[j] || dataTable.getColumnLabel(j) || `Kolom ${j + 1}`;
-                        const safeLabel = escapeHtml(displayLabel);
-                        const displayValue = formatValueForDisplay(rawValue);
-                        const safeDisplayValue = escapeHtml(displayValue);
-                        const inputValue = formatValueForInput(rawValue, j);
-                        const isEditable = EDITABLE_COLUMNS.has(j);
+                            const rawValue = dataTable.getValue(i, j);
+                            const displayLabel = headerMap[j] || dataTable.getColumnLabel(j) || `Kolom ${j + 1}`;
+                            const safeLabel = escapeHtml(displayLabel);
+                            const displayValue = formatValueForDisplay(rawValue);
+                            const safeDisplayValue = escapeHtml(displayValue);
+                            const inputValue = formatValueForInput(rawValue, j);
+                            const isEditable = EDITABLE_COLUMNS.has(j);
 
-                        if (typeof rawValue === 'string' && rawValue.includes('drive.google.com')) {
-                            let fileIdMatch = rawValue.match(/id=([a-zA-Z0-9_-]+)/);
-                            if (!fileIdMatch) fileIdMatch = rawValue.match(/d\/([a-zA-Z0-9_-]+)/);
+                            if (typeof rawValue === 'string' && rawValue.includes('drive.google.com')) {
+                                let fileIdMatch = rawValue.match(/id=([a-zA-Z0-9_-]+)/);
+                                if (!fileIdMatch) fileIdMatch = rawValue.match(/d\/([a-zA-Z0-9_-]+)/);
 
-                            if (fileIdMatch && fileIdMatch[1]) {
-                                const fileId = fileIdMatch[1];
-                                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                                if (fileIdMatch && fileIdMatch[1]) {
+                                    const fileId = fileIdMatch[1];
+                                    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-                                // Get upload link for this file type
-                                const uploadLink = UPLOAD_LINKS_MAP[j];
+                                    // Get upload link for this file type
+                                    const uploadLink = UPLOAD_LINKS_MAP[j];
 
-                                htmlParts.push(`
+                                    htmlParts.push(`
                                 <div class="field">
                                     <div class="label">${safeLabel}</div>
                                     <div class="value">
@@ -1652,15 +1683,15 @@
                                         </div>
                                     </div>
                                 </div>`);
-                                continue;
+                                    continue;
+                                }
                             }
-                        }
 
-                        if (isEditable) {
-                            const prefixHTML = generatePrefixHTML(j);
-                            const inputClass = prefixHTML ? 'input-with-prefix' : '';
-                            
-                            htmlParts.push(`
+                            if (isEditable) {
+                                const prefixHTML = generatePrefixHTML(j);
+                                const inputClass = prefixHTML ? 'input-with-prefix' : '';
+
+                                htmlParts.push(`
                             <div class="field">
                                 <div class="label">${safeLabel}</div>
                                 <div class="value">
@@ -1675,16 +1706,16 @@
                                     </div>
                                 </div>
                             </div>`);
-                        } else {
-                            htmlParts.push(`
+                            } else {
+                                htmlParts.push(`
                             <div class="field">
                                 <div class="label">${safeLabel}</div>
                                 <div class="value">${safeDisplayValue}</div>
                             </div>`);
+                            }
                         }
-                    }
 
-                    htmlParts.push(`
+                        htmlParts.push(`
                     <div class="actions">
                         <button class="primary" id="saveChangesBtn" onclick="saveEdits()">
                             <span id="saveButtonText">Simpan Perubahan</span>
@@ -1693,266 +1724,266 @@
                     </div>
                     <div class="prefill-link" id="prefillLinkContainer"></div>`);
 
-                    resultDiv.innerHTML = htmlParts.join('');
-                    resetSaveState();
+                        resultDiv.innerHTML = htmlParts.join('');
+                        resetSaveState();
+                        resetPrefillUI();
+                        break;
+                    }
+                }
+
+                if (!found) {
+                    resultDiv.innerHTML = '<p>NIP tidak ditemukan</p>';
                     resetPrefillUI();
-                    break;
                 }
             }
 
-            if (!found) {
-                resultDiv.innerHTML = '<p>NIP tidak ditemukan</p>';
-                resetPrefillUI();
+            function setSavingState(state) {
+                isSaving = state;
+                const button = document.getElementById('saveChangesBtn');
+                const buttonText = document.getElementById('saveButtonText');
+                const confirmBtn = document.getElementById('confirmSaveBtn');
+
+                if (button && buttonText) {
+                    button.disabled = state;
+                    if (state) {
+                        button.classList.add('btn-loading');
+                        buttonText.textContent = 'Menyimpan...';
+                    } else {
+                        button.classList.remove('btn-loading');
+                        buttonText.textContent = 'Simpan Perubahan';
+                    }
+                }
+
+                if (confirmBtn) {
+                    confirmBtn.disabled = state;
+                    if (state) {
+                        confirmBtn.classList.add('btn-loading');
+                        confirmBtn.innerHTML = '<span>Menyimpan...</span>';
+                    } else {
+                        confirmBtn.classList.remove('btn-loading');
+                        confirmBtn.innerHTML = 'Simpan Perubahan';
+                    }
+                }
             }
-        }
+            function resetSaveState() {
+                isSaving = false;
+                const button = document.getElementById('saveChangesBtn');
+                const buttonText = document.getElementById('saveButtonText');
+                const confirmBtn = document.getElementById('confirmSaveBtn');
 
-        function setSavingState(state) {
-            isSaving = state;
-            const button = document.getElementById('saveChangesBtn');
-            const buttonText = document.getElementById('saveButtonText');
-            const confirmBtn = document.getElementById('confirmSaveBtn');
-
-            if (button && buttonText) {
-                button.disabled = state;
-                if (state) {
-                    button.classList.add('btn-loading');
-                    buttonText.textContent = 'Menyimpan...';
-                } else {
+                if (button && buttonText) {
+                    button.disabled = false;
                     button.classList.remove('btn-loading');
                     buttonText.textContent = 'Simpan Perubahan';
                 }
-            }
 
-            if (confirmBtn) {
-                confirmBtn.disabled = state;
-                if (state) {
-                    confirmBtn.classList.add('btn-loading');
-                    confirmBtn.innerHTML = '<span>Menyimpan...</span>';
-                } else {
+                if (confirmBtn) {
+                    confirmBtn.disabled = false;
                     confirmBtn.classList.remove('btn-loading');
                     confirmBtn.innerHTML = 'Simpan Perubahan';
                 }
-            }
-        }
-        function resetSaveState() {
-            isSaving = false;
-            const button = document.getElementById('saveChangesBtn');
-            const buttonText = document.getElementById('saveButtonText');
-            const confirmBtn = document.getElementById('confirmSaveBtn');
 
-            if (button && buttonText) {
-                button.disabled = false;
-                button.classList.remove('btn-loading');
-                buttonText.textContent = 'Simpan Perubahan';
+                pendingChanges = null;
+                resetPrefillUI();
+                closePrefillModal();
             }
 
-            if (confirmBtn) {
-                confirmBtn.disabled = false;
-                confirmBtn.classList.remove('btn-loading');
-                confirmBtn.innerHTML = 'Simpan Perubahan';
-            }
 
-            pendingChanges = null;
-            resetPrefillUI();
-            closePrefillModal();
-        }
+            function renderPrefillOptions() {
+                const container = document.getElementById('prefillOptionsContainer');
+                if (!container) return;
 
+                container.innerHTML = '';
 
-        function renderPrefillOptions() {
-            const container = document.getElementById('prefillOptionsContainer');
-            if (!container) return;
-
-            container.innerHTML = '';
-
-            Object.entries(PREFILL_FORM_OPTIONS).forEach(([key, config]) => {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'prefill-option';
-                button.dataset.formKey = key;
-                button.innerHTML = `
+                Object.entries(PREFILL_FORM_OPTIONS).forEach(([key, config]) => {
+                    const button = document.createElement('button');
+                    button.type = 'button';
+                    button.className = 'prefill-option';
+                    button.dataset.formKey = key;
+                    button.innerHTML = `
                     <span class="prefill-option__title">${escapeHtml(config.label)}</span>
                 `;
-                button.addEventListener('click', () => handlePrefillOptionClick(key));
-                container.appendChild(button);
-            });
-        }
-
-        function setupPrefillModal() {
-            const overlay = document.getElementById('prefillModalOverlay');
-            if (overlay) {
-                overlay.addEventListener('click', closePrefillModal);
-            }
-            renderPrefillOptions();
-        }
-
-        function openPrefillModal() {
-            if (currentRowIndex === null || currentRowDataIndex === null) {
-                showNotification('Tidak ada data yang dipilih.', 'error');
-                updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
-                return;
+                    button.addEventListener('click', () => handlePrefillOptionClick(key));
+                    container.appendChild(button);
+                });
             }
 
-            const overlay = document.getElementById('prefillModalOverlay');
-            const modal = document.getElementById('prefillModal');
-            const prefillInstructions = document.getElementById('prefillInstructions');
-            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
-            if (!overlay || !modal) return;
-
-            if (!isPrefilling) {
-                const optionButtons = document.querySelectorAll('.prefill-option');
-                optionButtons.forEach(btn => btn.disabled = false);
-                
-                // Show instructions and options if not currently processing
-                if (prefillInstructions) {
-                    prefillInstructions.style.display = 'block';
+            function setupPrefillModal() {
+                const overlay = document.getElementById('prefillModalOverlay');
+                if (overlay) {
+                    overlay.addEventListener('click', closePrefillModal);
                 }
-                if (prefillOptionsContainer) {
-                    prefillOptionsContainer.style.display = 'block';
+                renderPrefillOptions();
+            }
+
+            function openPrefillModal() {
+                if (currentRowIndex === null || currentRowDataIndex === null) {
+                    showNotification('Tidak ada data yang dipilih.', 'error');
+                    updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
+                    return;
                 }
-            }
 
-            updatePrefillStatus('', 'default');
+                const overlay = document.getElementById('prefillModalOverlay');
+                const modal = document.getElementById('prefillModal');
+                const prefillInstructions = document.getElementById('prefillInstructions');
+                const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+                if (!overlay || !modal) return;
 
-            const modalLink = document.getElementById('prefillModalLinkContainer');
-            const container = document.getElementById('prefillLinkContainer');
-            if (modalLink) {
-                modalLink.innerHTML = container ? container.innerHTML : '';
-            }
+                if (!isPrefilling) {
+                    const optionButtons = document.querySelectorAll('.prefill-option');
+                    optionButtons.forEach(btn => btn.disabled = false);
 
-            overlay.style.display = 'block';
-            modal.style.display = 'block';
-            modal.setAttribute('aria-hidden', 'false');
-        }
-
-        function closePrefillModal() {
-            const overlay = document.getElementById('prefillModalOverlay');
-            const modal = document.getElementById('prefillModal');
-            if (!overlay || !modal) return;
-
-            overlay.style.display = 'none';
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-        }
-
-        function handlePrefillOptionClick(formKey) {
-            if (!formKey) return;
-            syncPrefillLink(formKey);
-        }
-
-        function updatePrefillStatus(message, type = 'default') {
-            const status = document.getElementById('prefillStatus');
-            const modalStatus = document.getElementById('prefillModalStatus');
-            const safeMessage = message || '';
-
-            if (status) {
-                let className = 'status-message';
-                if (type === 'success') className += ' success';
-                if (type === 'error') className += ' error';
-                status.className = className;
-                status.textContent = safeMessage;
-            }
-
-            if (modalStatus) {
-                let className = 'prefill-modal__status';
-                if (type === 'success') className += ' prefill-modal__status--success';
-                if (type === 'error') className += ' prefill-modal__status--error';
-                modalStatus.className = className;
-                modalStatus.textContent = safeMessage;
-            }
-        }
-
-        function showPrefillResultLink(url, formConfig) {
-            const container = document.getElementById('prefillLinkContainer');
-            const modalLink = document.getElementById('prefillModalLinkContainer');
-            const prefillInstructions = document.getElementById('prefillInstructions');
-            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
-
-            if (url) {
-                const safeUrl = escapeHtml(url);
-                const label = formConfig ? escapeHtml(formConfig.label) : 'Form';
-                const linkText = `Buka ${label}`;
-                const linkHtml = `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
-                if (container) {
-                    container.innerHTML = linkHtml;
+                    // Show instructions and options if not currently processing
+                    if (prefillInstructions) {
+                        prefillInstructions.style.display = 'block';
+                    }
+                    if (prefillOptionsContainer) {
+                        prefillOptionsContainer.style.display = 'block';
+                    }
                 }
+
+                updatePrefillStatus('', 'default');
+
+                const modalLink = document.getElementById('prefillModalLinkContainer');
+                const container = document.getElementById('prefillLinkContainer');
                 if (modalLink) {
-                    modalLink.innerHTML = linkHtml;
+                    modalLink.innerHTML = container ? container.innerHTML : '';
                 }
-                
-                // Hide instructions and options after successful generation
-                if (prefillInstructions) {
-                    prefillInstructions.style.display = 'none';
+
+                overlay.style.display = 'block';
+                modal.style.display = 'block';
+                modal.setAttribute('aria-hidden', 'false');
+            }
+
+            function closePrefillModal() {
+                const overlay = document.getElementById('prefillModalOverlay');
+                const modal = document.getElementById('prefillModal');
+                if (!overlay || !modal) return;
+
+                overlay.style.display = 'none';
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
+
+            function handlePrefillOptionClick(formKey) {
+                if (!formKey) return;
+                syncPrefillLink(formKey);
+            }
+
+            function updatePrefillStatus(message, type = 'default') {
+                const status = document.getElementById('prefillStatus');
+                const modalStatus = document.getElementById('prefillModalStatus');
+                const safeMessage = message || '';
+
+                if (status) {
+                    let className = 'status-message';
+                    if (type === 'success') className += ' success';
+                    if (type === 'error') className += ' error';
+                    status.className = className;
+                    status.textContent = safeMessage;
                 }
-                if (prefillOptionsContainer) {
-                    prefillOptionsContainer.style.display = 'none';
+
+                if (modalStatus) {
+                    let className = 'prefill-modal__status';
+                    if (type === 'success') className += ' prefill-modal__status--success';
+                    if (type === 'error') className += ' prefill-modal__status--error';
+                    modalStatus.className = className;
+                    modalStatus.textContent = safeMessage;
                 }
-                
-                // Show documents list after successful prefill generation
-                showDocumentsList();
-            } else {
-                if (container) {
-                    container.innerHTML = '';
+            }
+
+            function showPrefillResultLink(url, formConfig) {
+                const container = document.getElementById('prefillLinkContainer');
+                const modalLink = document.getElementById('prefillModalLinkContainer');
+                const prefillInstructions = document.getElementById('prefillInstructions');
+                const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+
+                if (url) {
+                    const safeUrl = escapeHtml(url);
+                    const label = formConfig ? escapeHtml(formConfig.label) : 'Form';
+                    const linkText = `Buka ${label}`;
+                    const linkHtml = `<a href="${safeUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
+                    if (container) {
+                        container.innerHTML = linkHtml;
+                    }
+                    if (modalLink) {
+                        modalLink.innerHTML = linkHtml;
+                    }
+
+                    // Hide instructions and options after successful generation
+                    if (prefillInstructions) {
+                        prefillInstructions.style.display = 'none';
+                    }
+                    if (prefillOptionsContainer) {
+                        prefillOptionsContainer.style.display = 'none';
+                    }
+
+                    // Show documents list after successful prefill generation
+                    showDocumentsList();
+                } else {
+                    if (container) {
+                        container.innerHTML = '';
+                    }
+                    if (modalLink) {
+                        modalLink.innerHTML = '';
+                    }
+
+                    // Show instructions and options again if no link
+                    if (prefillInstructions) {
+                        prefillInstructions.style.display = 'block';
+                    }
+                    if (prefillOptionsContainer) {
+                        prefillOptionsContainer.style.display = 'block';
+                    }
+
+                    // Hide documents modal if no prefill link
+                    const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
+                    if (documentsModalContainer) documentsModalContainer.style.display = 'none';
                 }
-                if (modalLink) {
-                    modalLink.innerHTML = '';
-                }
-                
-                // Show instructions and options again if no link
-                if (prefillInstructions) {
-                    prefillInstructions.style.display = 'block';
-                }
-                if (prefillOptionsContainer) {
-                    prefillOptionsContainer.style.display = 'block';
-                }
-                
-                // Hide documents modal if no prefill link
+            }
+
+            function showDocumentsList() {
+                if (currentRowDataIndex === null || !dataTable) return;
+
                 const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
-                if (documentsModalContainer) documentsModalContainer.style.display = 'none';
-            }
-        }
+                const documentsModalList = document.getElementById('prefillModalDocumentsList');
 
-        function showDocumentsList() {
-            if (currentRowDataIndex === null || !dataTable) return;
+                // Define file columns that contain documents
+                const documentColumns = [
+                    { index: 2, label: 'Sertifikat UKKJ' },
+                    { index: 17, label: 'Surat Pengantar dan SPTJM' },
+                    { index: 19, label: 'SK CPNS, SK PNS, SK Jabatan, SK Pangkat' },
+                    { index: 21, label: 'PAK Konversi Terakhir' },
+                    { index: 23, label: 'Ijazah dan Transkrip' },
+                    { index: 25, label: 'Penilaian SKP 2 tahun terakhir' },
+                    { index: 27, label: 'SUKET TUBEL' },
+                    { index: 29, label: 'SUKET HUKDIS' }
+                ];
 
-            const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
-            const documentsModalList = document.getElementById('prefillModalDocumentsList');
+                const availableDocuments = [];
 
-            // Define file columns that contain documents
-            const documentColumns = [
-                { index: 2, label: 'Sertifikat UKKJ' },
-                { index: 17, label: 'Surat Pengantar dan SPTJM' },
-                { index: 19, label: 'SK CPNS, SK PNS, SK Jabatan, SK Pangkat' },
-                { index: 21, label: 'PAK Konversi Terakhir' },
-                { index: 23, label: 'Ijazah dan Transkrip' },
-                { index: 25, label: 'Penilaian SKP 2 tahun terakhir' },
-                { index: 27, label: 'SUKET TUBEL' },
-                { index: 29, label: 'SUKET HUKDIS' }
-            ];
+                // Collect available documents
+                documentColumns.forEach(doc => {
+                    const fileValue = dataTable.getValue(currentRowDataIndex, doc.index);
+                    if (fileValue && fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
+                        availableDocuments.push({
+                            label: doc.label,
+                            url: fileValue.toString().trim(),
+                            columnIndex: doc.index
+                        });
+                    }
+                });
 
-            const availableDocuments = [];
-
-            // Collect available documents
-            documentColumns.forEach(doc => {
-                const fileValue = dataTable.getValue(currentRowDataIndex, doc.index);
-                if (fileValue && fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
-                    availableDocuments.push({
-                        label: doc.label,
-                        url: fileValue.toString().trim(),
-                        columnIndex: doc.index
-                    });
+                if (availableDocuments.length === 0) {
+                    // Hide modal container if no documents
+                    if (documentsModalContainer) documentsModalContainer.style.display = 'none';
+                    return;
                 }
-            });
 
-            if (availableDocuments.length === 0) {
-                // Hide modal container if no documents
-                if (documentsModalContainer) documentsModalContainer.style.display = 'none';
-                return;
-            }
-
-            // Generate HTML for documents list
-            const documentsHtml = availableDocuments.map(doc => {
-                const shortUrl = doc.url.length > 50 ? doc.url.substring(0, 50) + '...' : doc.url;
-                return `
+                // Generate HTML for documents list
+                const documentsHtml = availableDocuments.map(doc => {
+                    const shortUrl = doc.url.length > 50 ? doc.url.substring(0, 50) + '...' : doc.url;
+                    return `
                     <div class="document-item">
                         <div class="document-item__info">
                             <div class="document-item__label">${escapeHtml(doc.label)}</div>
@@ -1964,256 +1995,256 @@
                         </div>
                     </div>
                 `;
-            }).join('');
+                }).join('');
 
-            // Generate header with copy all button
-            const headerHtml = `
+                // Generate header with copy all button
+                const headerHtml = `
                 <h4>
                     Semua Dokumen Tersedia:
                     <button class="copy-all-btn" onclick="copyAllDocuments()">Copy All Links</button>
                 </h4>
             `;
 
-            // Show and populate modal container only
-            if (documentsModalContainer && documentsModalList) {
-                documentsModalContainer.style.display = 'block';
-                const modalHeaderElement = documentsModalContainer.querySelector('.prefill-modal__documents-header');
-                if (modalHeaderElement) {
-                    modalHeaderElement.innerHTML = headerHtml;
+                // Show and populate modal container only
+                if (documentsModalContainer && documentsModalList) {
+                    documentsModalContainer.style.display = 'block';
+                    const modalHeaderElement = documentsModalContainer.querySelector('.prefill-modal__documents-header');
+                    if (modalHeaderElement) {
+                        modalHeaderElement.innerHTML = headerHtml;
+                    }
+                    documentsModalList.innerHTML = documentsHtml;
                 }
-                documentsModalList.innerHTML = documentsHtml;
+
+                // Store available documents globally for copy all function
+                window.currentAvailableDocuments = availableDocuments;
             }
 
-            // Store available documents globally for copy all function
-            window.currentAvailableDocuments = availableDocuments;
-        }
+            function copyAllDocuments() {
+                if (!window.currentAvailableDocuments || window.currentAvailableDocuments.length === 0) {
+                    showNotification('Tidak ada dokumen yang tersedia untuk disalin.', 'error');
+                    return;
+                }
 
-        function copyAllDocuments() {
-            if (!window.currentAvailableDocuments || window.currentAvailableDocuments.length === 0) {
-                showNotification('Tidak ada dokumen yang tersedia untuk disalin.', 'error');
-                return;
+                // Create formatted text with all document links
+                const allLinks = window.currentAvailableDocuments.map(doc => {
+                    return `${doc.label}:\n${doc.url}`;
+                }).join('\n\n');
+
+                navigator.clipboard.writeText(allLinks).then(() => {
+                    // Update all copy all buttons
+                    const copyAllButtons = document.querySelectorAll('.copy-all-btn');
+                    copyAllButtons.forEach(button => {
+                        const originalText = button.textContent;
+                        button.textContent = 'Copied All!';
+                        button.classList.add('copied');
+
+                        setTimeout(() => {
+                            button.textContent = originalText;
+                            button.classList.remove('copied');
+                        }, 3000);
+                    });
+
+                    showNotification(`${window.currentAvailableDocuments.length} link dokumen berhasil disalin ke clipboard.`, 'success');
+                }).catch(err => {
+                    console.error('Failed to copy all: ', err);
+                    showNotification('Gagal menyalin semua link.', 'error');
+                });
             }
 
-            // Create formatted text with all document links
-            const allLinks = window.currentAvailableDocuments.map(doc => {
-                return `${doc.label}:\n${doc.url}`;
-            }).join('\n\n');
-
-            navigator.clipboard.writeText(allLinks).then(() => {
-                // Update all copy all buttons
-                const copyAllButtons = document.querySelectorAll('.copy-all-btn');
-                copyAllButtons.forEach(button => {
+            function copyDocumentLink(url, button) {
+                navigator.clipboard.writeText(url).then(() => {
                     const originalText = button.textContent;
-                    button.textContent = 'Copied All!';
+                    button.textContent = 'Copied!';
                     button.classList.add('copied');
-                    
+
                     setTimeout(() => {
                         button.textContent = originalText;
                         button.classList.remove('copied');
-                    }, 3000);
+                    }, 2000);
+
+                    showNotification('Link berhasil disalin ke clipboard.', 'success');
+                }).catch(err => {
+                    console.error('Failed to copy: ', err);
+                    showNotification('Gagal menyalin link.', 'error');
                 });
-                
-                showNotification(`${window.currentAvailableDocuments.length} link dokumen berhasil disalin ke clipboard.`, 'success');
-            }).catch(err => {
-                console.error('Failed to copy all: ', err);
-                showNotification('Gagal menyalin semua link.', 'error');
-            });
-        }
+            }
 
-        function copyDocumentLink(url, button) {
-            navigator.clipboard.writeText(url).then(() => {
-                const originalText = button.textContent;
-                button.textContent = 'Copied!';
-                button.classList.add('copied');
-                
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('copied');
-                }, 2000);
-                
-                showNotification('Link berhasil disalin ke clipboard.', 'success');
-            }).catch(err => {
-                console.error('Failed to copy: ', err);
-                showNotification('Gagal menyalin link.', 'error');
-            });
-        }
+            function viewDocument(url) {
+                // Extract file ID and create preview URL
+                let fileId = null;
+                const patterns = [
+                    /\/file\/d\/([a-zA-Z0-9_-]+)/,
+                    /id=([a-zA-Z0-9_-]+)/,
+                    /\/open\?id=([a-zA-Z0-9_-]+)/,
+                    /\/view\?id=([a-zA-Z0-9_-]+)/,
+                    /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/
+                ];
 
-        function viewDocument(url) {
-            // Extract file ID and create preview URL
-            let fileId = null;
-            const patterns = [
-                /\/file\/d\/([a-zA-Z0-9_-]+)/, 
-                /id=([a-zA-Z0-9_-]+)/, 
-                /\/open\?id=([a-zA-Z0-9_-]+)/, 
-                /\/view\?id=([a-zA-Z0-9_-]+)/, 
-                /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/
-            ];
-            
-            for (const pattern of patterns) {
-                const match = url.match(pattern);
-                if (match && match[1]) {
-                    fileId = match[1];
-                    break;
+                for (const pattern of patterns) {
+                    const match = url.match(pattern);
+                    if (match && match[1]) {
+                        fileId = match[1];
+                        break;
+                    }
+                }
+
+                if (fileId) {
+                    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                    openPopup(embedUrl);
+                } else {
+                    // Fallback to original URL
+                    window.open(url, '_blank');
                 }
             }
 
-            if (fileId) {
-                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                openPopup(embedUrl);
-            } else {
-                // Fallback to original URL
-                window.open(url, '_blank');
-            }
-        }
+            function setPrefillState(state, formLabel = '') {
+                isPrefilling = state;
+                const button = document.getElementById('prefillBtn');
+                const buttonText = document.getElementById('prefillButtonText');
+                const optionButtons = document.querySelectorAll('.prefill-option');
 
-        function setPrefillState(state, formLabel = '') {
-            isPrefilling = state;
-            const button = document.getElementById('prefillBtn');
-            const buttonText = document.getElementById('prefillButtonText');
-            const optionButtons = document.querySelectorAll('.prefill-option');
+                if (button && buttonText) {
+                    button.disabled = state;
+                    if (state) {
+                        button.classList.add('btn-loading');
+                        buttonText.textContent = 'Menyiapkan...';
+                    } else {
+                        button.classList.remove('btn-loading');
+                        buttonText.textContent = 'Generate Link Prefill';
+                    }
+                }
 
-            if (button && buttonText) {
-                button.disabled = state;
+                optionButtons.forEach(btn => {
+                    btn.disabled = state;
+                });
+
                 if (state) {
-                    button.classList.add('btn-loading');
-                    buttonText.textContent = 'Menyiapkan...';
-                } else {
+                    const statusMessage = formLabel ? `Menyiapkan tautan untuk ${formLabel}...` : 'Sedang menyiapkan tautan...';
+                    updatePrefillStatus(statusMessage);
+                }
+            }
+
+            function resetPrefillUI() {
+                isPrefilling = false;
+                const button = document.getElementById('prefillBtn');
+                const buttonText = document.getElementById('prefillButtonText');
+                const container = document.getElementById('prefillLinkContainer');
+                const modalLink = document.getElementById('prefillModalLinkContainer');
+                const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
+                const prefillInstructions = document.getElementById('prefillInstructions');
+                const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
+                const optionButtons = document.querySelectorAll('.prefill-option');
+
+                if (button && buttonText) {
+                    button.disabled = false;
                     button.classList.remove('btn-loading');
                     buttonText.textContent = 'Generate Link Prefill';
                 }
+
+                optionButtons.forEach(btn => {
+                    btn.disabled = false;
+                });
+
+                updatePrefillStatus('', 'default');
+
+                if (container) {
+                    container.innerHTML = '';
+                }
+
+                if (modalLink) {
+                    modalLink.innerHTML = '';
+                }
+
+                // Show instructions and options again
+                if (prefillInstructions) {
+                    prefillInstructions.style.display = 'block';
+                }
+                if (prefillOptionsContainer) {
+                    prefillOptionsContainer.style.display = 'block';
+                }
+
+                // Hide documents modal container
+                if (documentsModalContainer) {
+                    documentsModalContainer.style.display = 'none';
+                }
             }
 
-            optionButtons.forEach(btn => {
-                btn.disabled = state;
-            });
+            function syncPrefillLink(formKey) {
+                if (isPrefilling) {
+                    return;
+                }
 
-            if (state) {
-                const statusMessage = formLabel ? `Menyiapkan tautan untuk ${formLabel}...` : 'Sedang menyiapkan tautan...';
-                updatePrefillStatus(statusMessage);
+                if (!formKey || !Object.prototype.hasOwnProperty.call(PREFILL_FORM_OPTIONS, formKey)) {
+                    updatePrefillStatus('Pilih jenis form yang valid.', 'error');
+                    showNotification('Pilih jenis form yang valid.', 'error');
+                    return;
+                }
+
+                if (currentRowIndex === null || currentRowDataIndex === null) {
+                    updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
+                    showNotification('Tidak ada data yang dipilih.', 'error');
+                    return;
+                }
+
+                if (!google || !google.script || !google.script.run) {
+                    updatePrefillStatus('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                    showNotification('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                    return;
+                }
+
+                const formConfig = PREFILL_FORM_OPTIONS[formKey];
+
+                setPrefillState(true, formConfig.label);
+
+                google.script.run
+                    .withSuccessHandler((result) => {
+                        setPrefillState(false);
+
+                        const url = result && result.url ? result.url : '';
+                        const message = result && result.message ? result.message : '';
+
+                        if (url) {
+                            showPrefillResultLink(url, formConfig);
+                            updatePrefillStatus('Tautan prefill siap dibuka.', 'success');
+                            showNotification(`Tautan prefill ${formConfig.label} berhasil dibuat.`, 'success');
+                        } else {
+                            showPrefillResultLink('', formConfig);
+                            const errorMessage = message || 'Tidak ada data untuk disinkronisasi.';
+                            updatePrefillStatus(errorMessage, 'error');
+                            showNotification(message || 'Tidak dapat membuat tautan prefill.', 'error');
+                        }
+                    })
+                    .withFailureHandler((error) => {
+                        console.error(error);
+                        setPrefillState(false);
+
+                        updatePrefillStatus('Gagal sinkronisasi.', 'error');
+                        const errorMessage = 'Gagal sinkronisasi prefill: ' + (error && error.message ? error.message : error);
+                        showNotification(errorMessage, 'error');
+                    })
+                    .syncPrefillForRow(currentRowIndex, formKey);
             }
-        }
+            function showNotification(message, type = 'info', changes = null) {
+                // Remove existing notifications
+                const existingNotifications = document.querySelectorAll('.notification');
+                existingNotifications.forEach(n => n.remove());
 
-        function resetPrefillUI() {
-            isPrefilling = false;
-            const button = document.getElementById('prefillBtn');
-            const buttonText = document.getElementById('prefillButtonText');
-            const container = document.getElementById('prefillLinkContainer');
-            const modalLink = document.getElementById('prefillModalLinkContainer');
-            const documentsModalContainer = document.getElementById('prefillModalDocumentsContainer');
-            const prefillInstructions = document.getElementById('prefillInstructions');
-            const prefillOptionsContainer = document.getElementById('prefillOptionsContainer');
-            const optionButtons = document.querySelectorAll('.prefill-option');
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
 
-            if (button && buttonText) {
-                button.disabled = false;
-                button.classList.remove('btn-loading');
-                buttonText.textContent = 'Generate Link Prefill';
-            }
+                let title = 'Informasi';
+                if (type === 'success') title = 'Berhasil';
+                if (type === 'error') title = 'Error';
 
-            optionButtons.forEach(btn => {
-                btn.disabled = false;
-            });
+                let changesHtml = '';
+                if (changes && changes.length > 0) {
+                    const changesList = changes.map(change =>
+                        `<li>${escapeHtml(change.label)}: ${escapeHtml(change.from)} &rarr; ${escapeHtml(change.to)}</li>`
+                    ).join('');
+                    changesHtml = `<ul class="notification__changes">${changesList}</ul>`;
+                }
 
-            updatePrefillStatus('', 'default');
-
-            if (container) {
-                container.innerHTML = '';
-            }
-
-            if (modalLink) {
-                modalLink.innerHTML = '';
-            }
-
-            // Show instructions and options again
-            if (prefillInstructions) {
-                prefillInstructions.style.display = 'block';
-            }
-            if (prefillOptionsContainer) {
-                prefillOptionsContainer.style.display = 'block';
-            }
-
-            // Hide documents modal container
-            if (documentsModalContainer) {
-                documentsModalContainer.style.display = 'none';
-            }
-        }
-
-        function syncPrefillLink(formKey) {
-            if (isPrefilling) {
-                return;
-            }
-
-            if (!formKey || !Object.prototype.hasOwnProperty.call(PREFILL_FORM_OPTIONS, formKey)) {
-                updatePrefillStatus('Pilih jenis form yang valid.', 'error');
-                showNotification('Pilih jenis form yang valid.', 'error');
-                return;
-            }
-
-            if (currentRowIndex === null || currentRowDataIndex === null) {
-                updatePrefillStatus('Tidak ada data yang dipilih.', 'error');
-                showNotification('Tidak ada data yang dipilih.', 'error');
-                return;
-            }
-
-            if (!google || !google.script || !google.script.run) {
-                updatePrefillStatus('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                showNotification('Fitur sinkronisasi hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                return;
-            }
-
-            const formConfig = PREFILL_FORM_OPTIONS[formKey];
-
-            setPrefillState(true, formConfig.label);
-
-            google.script.run
-                .withSuccessHandler((result) => {
-                    setPrefillState(false);
-
-                    const url = result && result.url ? result.url : '';
-                    const message = result && result.message ? result.message : '';
-
-                    if (url) {
-                        showPrefillResultLink(url, formConfig);
-                        updatePrefillStatus('Tautan prefill siap dibuka.', 'success');
-                        showNotification(`Tautan prefill ${formConfig.label} berhasil dibuat.`, 'success');
-                    } else {
-                        showPrefillResultLink('', formConfig);
-                        const errorMessage = message || 'Tidak ada data untuk disinkronisasi.';
-                        updatePrefillStatus(errorMessage, 'error');
-                        showNotification(message || 'Tidak dapat membuat tautan prefill.', 'error');
-                    }
-                })
-                .withFailureHandler((error) => {
-                    console.error(error);
-                    setPrefillState(false);
-
-                    updatePrefillStatus('Gagal sinkronisasi.', 'error');
-                    const errorMessage = 'Gagal sinkronisasi prefill: ' + (error && error.message ? error.message : error);
-                    showNotification(errorMessage, 'error');
-                })
-                .syncPrefillForRow(currentRowIndex, formKey);
-        }
-        function showNotification(message, type = 'info', changes = null) {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(n => n.remove());
-
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-
-            let title = 'Informasi';
-            if (type === 'success') title = 'Berhasil';
-            if (type === 'error') title = 'Error';
-
-            let changesHtml = '';
-            if (changes && changes.length > 0) {
-                const changesList = changes.map(change =>
-                    `<li>${escapeHtml(change.label)}: ${escapeHtml(change.from)} &rarr; ${escapeHtml(change.to)}</li>`
-                ).join('');
-                changesHtml = `<ul class="notification__changes">${changesList}</ul>`;
-            }
-
-            notification.innerHTML = `
+                notification.innerHTML = `
                 <div class="notification__header">
                     <h4 class="notification__title">${title}</h4>
                     <button class="notification__close" onclick="this.parentElement.parentElement.remove()">&times;</button>
@@ -2224,60 +2255,60 @@
                 </div>
             `;
 
-            document.body.appendChild(notification);
+                document.body.appendChild(notification);
 
-            // Show notification
-            setTimeout(() => {
-                notification.classList.add('show');
-            }, 100);
+                // Show notification
+                setTimeout(() => {
+                    notification.classList.add('show');
+                }, 100);
 
-            // Auto hide after 5 seconds
-            setTimeout(() => {
-                if (notification.parentElement) {
-                    notification.classList.remove('show');
-                    setTimeout(() => {
-                        if (notification.parentElement) {
-                            notification.remove();
-                        }
-                    }, 300);
-                }
-            }, 5000);
-        }
+                // Auto hide after 5 seconds
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.classList.remove('show');
+                        setTimeout(() => {
+                            if (notification.parentElement) {
+                                notification.remove();
+                            }
+                        }, 300);
+                    }
+                }, 5000);
+            }
 
-        function showSuccessNotification(changes) {
-            // Filter out Keterangan changes from notifications
-            const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
-            
-            const message = filteredChanges.length === 1 ?
-                'Perubahan berhasil disimpan.' :
-                filteredChanges.length > 1 ?
-                `${filteredChanges.length} perubahan berhasil disimpan.` :
-                'Data berhasil disimpan.';
-            showNotification(message, 'success', filteredChanges);
-        }
+            function showSuccessNotification(changes) {
+                // Filter out Keterangan changes from notifications
+                const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
 
-        function openPreviewModal(changes) {
-            if (!Array.isArray(changes)) return;
-            
-            // Filter out Keterangan changes from preview modal
-            const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
-            
-            const overlay = document.getElementById('previewOverlay');
-            const modal = document.getElementById('previewModal');
-            const list = document.getElementById('previewChangesList');
-            const confirmBtn = document.getElementById('confirmSaveBtn');
+                const message = filteredChanges.length === 1 ?
+                    'Perubahan berhasil disimpan.' :
+                    filteredChanges.length > 1 ?
+                        `${filteredChanges.length} perubahan berhasil disimpan.` :
+                        'Data berhasil disimpan.';
+                showNotification(message, 'success', filteredChanges);
+            }
 
-            if (!overlay || !modal || !list || !confirmBtn) return;
+            function openPreviewModal(changes) {
+                if (!Array.isArray(changes)) return;
 
-            // Reset confirm button state
-            confirmBtn.disabled = false;
-            confirmBtn.classList.remove('btn-loading');
+                // Filter out Keterangan changes from preview modal
+                const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
 
-            list.innerHTML = '';
-            filteredChanges.forEach((entry) => {
-                const item = document.createElement('li');
-                item.className = 'preview-change-item';
-                item.innerHTML = `
+                const overlay = document.getElementById('previewOverlay');
+                const modal = document.getElementById('previewModal');
+                const list = document.getElementById('previewChangesList');
+                const confirmBtn = document.getElementById('confirmSaveBtn');
+
+                if (!overlay || !modal || !list || !confirmBtn) return;
+
+                // Reset confirm button state
+                confirmBtn.disabled = false;
+                confirmBtn.classList.remove('btn-loading');
+
+                list.innerHTML = '';
+                filteredChanges.forEach((entry) => {
+                    const item = document.createElement('li');
+                    item.className = 'preview-change-item';
+                    item.innerHTML = `
                     <div class="preview-change-item__label">${escapeHtml(entry.label)}</div>
                     <div class="preview-change-item__values">
                         <span class="preview-change-item__from">${escapeHtml(entry.from)}</span>
@@ -2285,902 +2316,889 @@
                         <span class="preview-change-item__to">${escapeHtml(entry.to)}</span>
                     </div>
                 `;
-                list.appendChild(item);
-            });
+                    list.appendChild(item);
+                });
 
-            overlay.style.display = 'block';
-            modal.style.display = 'block';
-            modal.setAttribute('aria-hidden', 'false');
-        }
-
-        function closePreviewModal() {
-            const overlay = document.getElementById('previewOverlay');
-            const modal = document.getElementById('previewModal');
-            if (!overlay || !modal) return;
-
-            overlay.style.display = 'none';
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-        }
-
-        function setupPreviewModal() {
-            const overlay = document.getElementById('previewOverlay');
-            if (overlay) {
-                overlay.addEventListener('click', closePreviewModal);
+                overlay.style.display = 'block';
+                modal.style.display = 'block';
+                modal.setAttribute('aria-hidden', 'false');
             }
-        }
 
-        function escapeHtml(value) {
-            return String(value ?? '')
-                .replace(/&/g, '&amp;')
-                .replace(/</g, '&lt;')
-                .replace(/>/g, '&gt;')
-                .replace(/"/g, '&quot;')
-                .replace(/'/g, '&#39;');
-        }
+            function closePreviewModal() {
+                const overlay = document.getElementById('previewOverlay');
+                const modal = document.getElementById('previewModal');
+                if (!overlay || !modal) return;
 
-        function formatValueForDisplay(value) {
-            if (value === null || value === undefined) return '';
-            if (value instanceof Date) {
-                return value.toLocaleDateString('id-ID');
+                overlay.style.display = 'none';
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
             }
-            return String(value);
-        }
 
-        function formatValueForInput(value, columnIndex = null) {
-            if (value === null || value === undefined) {
+            function setupPreviewModal() {
+                const overlay = document.getElementById('previewOverlay');
+                if (overlay) {
+                    overlay.addEventListener('click', closePreviewModal);
+                }
+            }
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function formatValueForDisplay(value) {
+                if (value === null || value === undefined) return '';
+                if (value instanceof Date) {
+                    return value.toLocaleDateString('id-ID');
+                }
+                return String(value);
+            }
+
+            function formatValueForInput(value, columnIndex = null) {
+                if (value === null || value === undefined) {
+                    return '';
+                }
+
+                let formattedValue = '';
+                if (value instanceof Date) {
+                    const year = value.getFullYear();
+                    const month = String(value.getMonth() + 1).padStart(2, '0');
+                    const day = String(value.getDate()).padStart(2, '0');
+                    formattedValue = `${year}-${month}-${day}`;
+                } else {
+                    formattedValue = String(value);
+                    // Remove single quote prefix if it exists for display in input
+                    if (columnIndex !== null && SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
+                        if (formattedValue.startsWith("'")) {
+                            formattedValue = formattedValue.substring(1);
+                        }
+                    }
+                }
+
+                return formattedValue;
+            }
+
+            function generatePrefixHTML(columnIndex) {
+                if (SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
+                    return '<div class="input-prefix">\'</div>';
+                }
                 return '';
             }
-            
-            let formattedValue = '';
-            if (value instanceof Date) {
-                const year = value.getFullYear();
-                const month = String(value.getMonth() + 1).padStart(2, '0');
-                const day = String(value.getDate()).padStart(2, '0');
-                formattedValue = `${year}-${month}-${day}`;
-            } else {
-                formattedValue = String(value);
-                // Remove single quote prefix if it exists for display in input
-                if (columnIndex !== null && SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
-                    if (formattedValue.startsWith("'")) {
-                        formattedValue = formattedValue.substring(1);
-                    }
+
+            function normalizeForComparison(value) {
+                if (value === null || value === undefined) return '';
+                return String(value).trim();
+            }
+
+            function formatChangeDisplay(value) {
+                if (value === null || value === undefined || value === '') return '(kosong)';
+                if (value instanceof Date) {
+                    return value.toLocaleDateString('id-ID');
                 }
-            }
-            
-            return formattedValue;
-        }
+                if (typeof value === 'string') {
+                    const trimmed = value.trim();
+                    if (!trimmed) return '(kosong)';
 
-        function generatePrefixHTML(columnIndex) {
-            if (SINGLE_QUOTE_PREFIX_COLUMNS.has(columnIndex)) {
-                return '<div class="input-prefix">\'</div>';
-            }
-            return '';
-        }
+                    // Remove single quote prefix for display in preview
+                    const cleanValue = trimmed.startsWith("'") ? trimmed.substring(1) : trimmed;
 
-        function normalizeForComparison(value) {
-            if (value === null || value === undefined) return '';
-            return String(value).trim();
-        }
-
-        function formatChangeDisplay(value) {
-            if (value === null || value === undefined || value === '') return '(kosong)';
-            if (value instanceof Date) {
-                return value.toLocaleDateString('id-ID');
-            }
-            if (typeof value === 'string') {
-                const trimmed = value.trim();
-                if (!trimmed) return '(kosong)';
-                
-                // Remove single quote prefix for display in preview
-                const cleanValue = trimmed.startsWith("'") ? trimmed.substring(1) : trimmed;
-                
-                if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
-                    const parts = cleanValue.split('-').map(Number);
-                    const parsed = new Date(parts[0], parts[1] - 1, parts[2]);
-                    if (!Number.isNaN(parsed.getTime())) {
-                        return parsed.toLocaleDateString('id-ID');
+                    if (/^\d{4}-\d{2}-\d{2}$/.test(cleanValue)) {
+                        const parts = cleanValue.split('-').map(Number);
+                        const parsed = new Date(parts[0], parts[1] - 1, parts[2]);
+                        if (!Number.isNaN(parsed.getTime())) {
+                            return parsed.toLocaleDateString('id-ID');
+                        }
                     }
+                    return cleanValue;
                 }
-                return cleanValue;
-            }
-            return String(value);
-        }
-
-        function updateStatus(statusText, rowIndex) {
-            google.script.run
-                .withSuccessHandler(function (response) {
-                    console.log(response);
-                    showNotification(`Status ${statusText} berhasil diperbarui.`, 'success');
-                    resetDisplay();
-                })
-                .withFailureHandler(function (error) {
-                    console.error(error);
-                    showNotification('Gagal memperbarui status. Silakan coba lagi.', 'error');
-                })
-                .updateKeterangan(rowIndex, statusText);
-        }
-
-        function saveEdits() {
-            if (isSaving) return;
-            if (currentRowIndex === null || currentRowDataIndex === null) {
-                showNotification('Tidak ada data yang dipilih.', 'error');
-                return;
+                return String(value);
             }
 
-            if (!google || !google.script || !google.script.run) {
-                showNotification('Fitur simpan hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                return;
+            function updateStatus(statusText, rowIndex) {
+                google.script.run
+                    .withSuccessHandler(function (response) {
+                        console.log(response);
+                        showNotification(`Status ${statusText} berhasil diperbarui.`, 'success');
+                        resetDisplay();
+                    })
+                    .withFailureHandler(function (error) {
+                        console.error(error);
+                        showNotification('Gagal memperbarui status. Silakan coba lagi.', 'error');
+                    })
+                    .updateKeterangan(rowIndex, statusText);
             }
 
-            const inputs = document.querySelectorAll('.edit-input[data-col-index]');
-            const updates = {};
-            const changeSummaries = [];
+            function saveEdits() {
+                if (isSaving) return;
+                if (currentRowIndex === null || currentRowDataIndex === null) {
+                    showNotification('Tidak ada data yang dipilih.', 'error');
+                    return;
+                }
 
-            inputs.forEach((input) => {
-                const colIndex = Number(input.getAttribute('data-col-index'));
-                if (Number.isNaN(colIndex) || !EDITABLE_COLUMNS.has(colIndex)) return;
+                if (!google || !google.script || !google.script.run) {
+                    showNotification('Fitur simpan hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                    return;
+                }
 
-                const rawInputValue = input.value ?? '';
-                let newValue = rawInputValue.trim();
+                const inputs = document.querySelectorAll('.edit-input[data-col-index]');
+                const updates = {};
+                const changeSummaries = [];
 
-                // Get original value from data table
-                const originalRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
-                let originalValue = '';
+                inputs.forEach((input) => {
+                    const colIndex = Number(input.getAttribute('data-col-index'));
+                    if (Number.isNaN(colIndex) || !EDITABLE_COLUMNS.has(colIndex)) return;
 
-                if (originalRawValue instanceof Date) {
-                    const year = originalRawValue.getFullYear();
-                    const month = String(originalRawValue.getMonth() + 1).padStart(2, '0');
-                    const day = String(originalRawValue.getDate()).padStart(2, '0');
-                    originalValue = `${year}-${month}-${day}`;
-                    // Add single quote prefix for date columns that require it
+                    const rawInputValue = input.value ?? '';
+                    let newValue = rawInputValue.trim();
+
+                    // Get original value from data table
+                    const originalRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
+                    let originalValue = '';
+
+                    if (originalRawValue instanceof Date) {
+                        const year = originalRawValue.getFullYear();
+                        const month = String(originalRawValue.getMonth() + 1).padStart(2, '0');
+                        const day = String(originalRawValue.getDate()).padStart(2, '0');
+                        originalValue = `${year}-${month}-${day}`;
+                        // Add single quote prefix for date columns that require it
+                        if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
+                            originalValue = "'" + originalValue;
+                        }
+                    } else {
+                        originalValue = String(originalRawValue || '').trim();
+                        // No need to add prefix here since we'll check the raw value as-is
+                    }
+
+                    // For single quote prefix columns, ensure we add the prefix in the new value
                     if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
-                        originalValue = "'" + originalValue;
-                    }
-                } else {
-                    originalValue = String(originalRawValue || '').trim();
-                    // No need to add prefix here since we'll check the raw value as-is
-                }
-
-                // For single quote prefix columns, ensure we add the prefix in the new value
-                if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
-                    // Add prefix to the new value if it has content
-                    if (newValue) {
-                        newValue = "'" + newValue;
-                    }
-                }
-
-                // Compare values (remove prefix for comparison)
-                const normalizedOriginal = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && originalValue.startsWith("'") 
-                    ? originalValue.substring(1) 
-                    : originalValue;
-                const normalizedNew = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'") 
-                    ? newValue.substring(1) 
-                    : newValue;
-
-                if (normalizedOriginal !== normalizedNew) {
-                    const label = headerMap[colIndex] || dataTable.getColumnLabel(colIndex) || `Kolom ${colIndex + 1}`;
-
-                    // Convert date input back to proper format if needed
-                    let processedValue = newValue;
-                    if (/^\d{4}-\d{2}-\d{2}$/.test(newValue.replace(/^'/, ''))) {
-                        // For date fields with prefix, keep the prefix
-                        if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")) {
-                            processedValue = newValue; // Keep prefix + date
-                        } else {
-                            processedValue = newValue; // Regular date
+                        // Add prefix to the new value if it has content
+                        if (newValue) {
+                            newValue = "'" + newValue;
                         }
                     }
 
-                    updates[colIndex] = processedValue;
-                    changeSummaries.push({
-                        label,
-                        from: formatChangeDisplay(originalRawValue),
-                        to: formatChangeDisplay(processedValue)
-                    });
-                }
-            });
+                    // Compare values (remove prefix for comparison)
+                    const normalizedOriginal = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && originalValue.startsWith("'")
+                        ? originalValue.substring(1)
+                        : originalValue;
+                    const normalizedNew = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")
+                        ? newValue.substring(1)
+                        : newValue;
 
-            // Ensure all single quote prefix columns have proper prefix, even if not edited
-            SINGLE_QUOTE_PREFIX_COLUMNS.forEach(colIndex => {
-                // Skip if this column was already processed above
-                if (updates.hasOwnProperty(colIndex)) return;
-                
-                // Get current value from data table
-                const currentRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
-                let currentValue = '';
-                
-                if (currentRawValue instanceof Date) {
-                    const year = currentRawValue.getFullYear();
-                    const month = String(currentRawValue.getMonth() + 1).padStart(2, '0');
-                    const day = String(currentRawValue.getDate()).padStart(2, '0');
-                    currentValue = `${year}-${month}-${day}`;
-                } else {
-                    currentValue = String(currentRawValue || '').trim();
-                }
-                
-                // Check if prefix is needed
-                if (currentValue && !currentValue.startsWith("'")) {
-                    const newValue = "'" + currentValue;
-                    updates[colIndex] = newValue;
-                    // Note: We don't add this to changeSummaries to keep the preview clean
-                }
-            });
+                    if (normalizedOriginal !== normalizedNew) {
+                        const label = headerMap[colIndex] || dataTable.getColumnLabel(colIndex) || `Kolom ${colIndex + 1}`;
 
-            // Allow saving even if no changes
-            if (!Object.keys(updates).length) {
-                // Still proceed with save to trigger any server-side logic
-                pendingChanges = { updates: {}, changeSummaries: [] };
-                openPreviewModal([{
-                    label: 'Status',
-                    from: 'Tidak ada perubahan',
-                    to: 'Data akan disinkronisasi'
-                }]);
-                return;
-            }
-
-            pendingChanges = { updates, changeSummaries };
-            openPreviewModal(changeSummaries);
-        }
-
-        function confirmSaveEdits() {
-            if (!pendingChanges || isSaving) return;
-
-            const { updates, changeSummaries } = pendingChanges;
-
-            // Close preview modal and start loading state
-            closePreviewModal();
-            setSavingState(true);
-
-            console.log('Saving updates:', updates);
-            console.log('Row index:', currentRowIndex);
-
-            // If no actual updates, just show success and return
-            if (Object.keys(updates).length === 0) {
-                setTimeout(() => {
-                    setSavingState(false);
-                    pendingChanges = null;
-                    showNotification('Data berhasil disinkronisasi.', 'success');
-                    // Get updated Keterangan data after sync
-                    refreshKeteranganData();
-                    resetPrefillUI();
-                    openPrefillModal();
-                }, 1000);
-                return;
-            }
-
-            google.script.run
-                .withSuccessHandler((response) => {
-                    console.log('Save success:', response);
-
-                    // Update local data table with new values
-                    Object.entries(updates).forEach(([colIndexStr, value]) => {
-                        const colIndex = Number(colIndexStr);
-                        if (!Number.isNaN(colIndex) && dataTable) {
-                            // Convert date string back to Date object if needed
-                            let processedValue = value;
-                            if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                                const parts = value.split('-').map(Number);
-                                processedValue = new Date(parts[0], parts[1] - 1, parts[2]);
+                        // Convert date input back to proper format if needed
+                        let processedValue = newValue;
+                        if (/^\d{4}-\d{2}-\d{2}$/.test(newValue.replace(/^'/, ''))) {
+                            // For date fields with prefix, keep the prefix
+                            if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")) {
+                                processedValue = newValue; // Keep prefix + date
+                            } else {
+                                processedValue = newValue; // Regular date
                             }
-                            dataTable.setValue(currentRowDataIndex, colIndex, processedValue);
                         }
-                    });
 
-                    setSavingState(false);
-                    pendingChanges = null;
+                        updates[colIndex] = processedValue;
+                        changeSummaries.push({
+                            label,
+                            from: formatChangeDisplay(originalRawValue),
+                            to: formatChangeDisplay(processedValue)
+                        });
+                    }
+                });
 
-                    // Show success notification
-                    showSuccessNotification(changeSummaries);
+                // Ensure all single quote prefix columns have proper prefix, even if not edited
+                SINGLE_QUOTE_PREFIX_COLUMNS.forEach(colIndex => {
+                    // Skip if this column was already processed above
+                    if (updates.hasOwnProperty(colIndex)) return;
 
-                    // Get updated Keterangan data after successful save
-                    refreshKeteranganData();
-                    resetPrefillUI();
-                    openPrefillModal();
-                })
-                .withFailureHandler((error) => {
-                    console.error('Save error:', error);
-                    setSavingState(false);
-                    pendingChanges = null;
-                    showNotification('Gagal menyimpan perubahan: ' + (error.message || error.toString()), 'error');
-                })
-                .updateRowFields(currentRowIndex, updates);
-        }
+                    // Get current value from data table
+                    const currentRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
+                    let currentValue = '';
 
-        // New function to refresh Keterangan data
-        function refreshKeteranganData() {
-            if (currentRowIndex === null || !google || !google.script || !google.script.run) {
-                return;
+                    if (currentRawValue instanceof Date) {
+                        const year = currentRawValue.getFullYear();
+                        const month = String(currentRawValue.getMonth() + 1).padStart(2, '0');
+                        const day = String(currentRawValue.getDate()).padStart(2, '0');
+                        currentValue = `${year}-${month}-${day}`;
+                    } else {
+                        currentValue = String(currentRawValue || '').trim();
+                    }
+
+                    // Check if prefix is needed
+                    if (currentValue && !currentValue.startsWith("'")) {
+                        const newValue = "'" + currentValue;
+                        updates[colIndex] = newValue;
+                        // Note: We don't add this to changeSummaries to keep the preview clean
+                    }
+                });
+
+                // Allow saving even if no changes
+                if (!Object.keys(updates).length) {
+                    // Still proceed with save to trigger any server-side logic
+                    pendingChanges = { updates: {}, changeSummaries: [] };
+                    openPreviewModal([{
+                        label: 'Status',
+                        from: 'Tidak ada perubahan',
+                        to: 'Data akan disinkronisasi'
+                    }]);
+                    return;
+                }
+
+                pendingChanges = { updates, changeSummaries };
+                openPreviewModal(changeSummaries);
             }
 
-            // Get updated Keterangan value from server
-            google.script.run
-                .withSuccessHandler((keteranganData) => {
-                    console.log('Keterangan data received:', keteranganData);
+            function confirmSaveEdits() {
+                if (!pendingChanges || isSaving) return;
 
-                    if (keteranganData && dataTable && currentRowDataIndex !== null) {
-                        // Update local data table with fresh Keterangan data
-                        const keteranganColIndex = 31;
-                        dataTable.setValue(currentRowDataIndex, keteranganColIndex, keteranganData.keterangan);
+                const { updates, changeSummaries } = pendingChanges;
 
-                        // Update display if Keterangan field is visible
-                        updateKeteranganDisplay(keteranganData);
+                // Close preview modal and start loading state
+                closePreviewModal();
+                setSavingState(true);
 
-                        console.log(`Keterangan updated: ${keteranganData}`);
-                    }
-                })
-                .withFailureHandler((error) => {
-                    console.error('Failed to get Keterangan data:', error);
-                })
-                .getKeteranganData(currentRowIndex);
-        }
+                console.log('Saving updates:', updates);
+                console.log('Row index:', currentRowIndex);
 
-        // Function to update Keterangan display in UI
-        function updateKeteranganDisplay(keteranganValue) {
-            // Find the Keterangan field in the result div and update its value
-            const resultDiv = document.getElementById('result');
-            if (!resultDiv) return;
+                // If no actual updates, just show success and return
+                if (Object.keys(updates).length === 0) {
+                    setTimeout(() => {
+                        setSavingState(false);
+                        pendingChanges = null;
+                        showNotification('Data berhasil disinkronisasi.', 'success');
+                        // Get updated Keterangan data after sync
+                        refreshKeteranganData();
+                        resetPrefillUI();
+                        openPrefillModal();
+                    }, 1000);
+                    return;
+                }
 
-            const fields = resultDiv.querySelectorAll('.field');
-            fields.forEach(field => {
-                const label = field.querySelector('.label');
-                if (label && label.textContent.trim() === 'Keterangan') {
-                    const valueDiv = field.querySelector('.value');
-                    if (valueDiv) {
-                        valueDiv.textContent = keteranganValue || '';
+                google.script.run
+                    .withSuccessHandler((response) => {
+                        console.log('Save success:', response);
 
-                        // Add visual indicator for status
-                        valueDiv.classList.remove('status-lengkap', 'status-belum-lengkap');
-                        if (keteranganValue === 'LENGKAP') {
-                            valueDiv.classList.add('status-lengkap');
-                        } else if (keteranganValue === 'BELUM LENGKAP') {
-                            valueDiv.classList.add('status-belum-lengkap');
+                        // Update local data table with new values
+                        Object.entries(updates).forEach(([colIndexStr, value]) => {
+                            const colIndex = Number(colIndexStr);
+                            if (!Number.isNaN(colIndex) && dataTable) {
+                                // Convert date string back to Date object if needed
+                                let processedValue = value;
+                                if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
+                                    const parts = value.split('-').map(Number);
+                                    processedValue = new Date(parts[0], parts[1] - 1, parts[2]);
+                                }
+                                dataTable.setValue(currentRowDataIndex, colIndex, processedValue);
+                            }
+                        });
+
+                        setSavingState(false);
+                        pendingChanges = null;
+
+                        // Show success notification
+                        showSuccessNotification(changeSummaries);
+
+                        // Get updated Keterangan data after successful save
+                        refreshKeteranganData();
+                        resetPrefillUI();
+                        openPrefillModal();
+                    })
+                    .withFailureHandler((error) => {
+                        console.error('Save error:', error);
+                        setSavingState(false);
+                        pendingChanges = null;
+                        showNotification('Gagal menyimpan perubahan: ' + (error.message || error.toString()), 'error');
+                    })
+                    .updateRowFields(currentRowIndex, updates);
+            }
+
+            // New function to refresh Keterangan data
+            function refreshKeteranganData() {
+                if (currentRowIndex === null || !google || !google.script || !google.script.run) {
+                    return;
+                }
+
+                // Get updated Keterangan value from server
+                google.script.run
+                    .withSuccessHandler((keteranganData) => {
+                        console.log('Keterangan data received:', keteranganData);
+
+                        if (keteranganData && dataTable && currentRowDataIndex !== null) {
+                            // Update local data table with fresh Keterangan data
+                            const keteranganColIndex = 31;
+                            dataTable.setValue(currentRowDataIndex, keteranganColIndex, keteranganData.keterangan);
+
+                            // Update display if Keterangan field is visible
+                            updateKeteranganDisplay(keteranganData);
+
+                            console.log(`Keterangan updated: ${keteranganData}`);
+                        }
+                    })
+                    .withFailureHandler((error) => {
+                        console.error('Failed to get Keterangan data:', error);
+                    })
+                    .getKeteranganData(currentRowIndex);
+            }
+
+            // Function to update Keterangan display in UI
+            function updateKeteranganDisplay(keteranganValue) {
+                // Find the Keterangan field in the result div and update its value
+                const resultDiv = document.getElementById('result');
+                if (!resultDiv) return;
+
+                const fields = resultDiv.querySelectorAll('.field');
+                fields.forEach(field => {
+                    const label = field.querySelector('.label');
+                    if (label && label.textContent.trim() === 'Keterangan') {
+                        const valueDiv = field.querySelector('.value');
+                        if (valueDiv) {
+                            valueDiv.textContent = keteranganValue || '';
+
+                            // Add visual indicator for status
+                            valueDiv.classList.remove('status-lengkap', 'status-belum-lengkap');
+                            if (keteranganValue === 'LENGKAP') {
+                                valueDiv.classList.add('status-lengkap');
+                            } else if (keteranganValue === 'BELUM LENGKAP') {
+                                valueDiv.classList.add('status-belum-lengkap');
+                            }
                         }
                     }
+                });
+            }
+
+            function resetDisplay() {
+                document.getElementById('nipInput').value = '';
+                document.getElementById('result').innerHTML = '';
+                currentRowIndex = null;
+                currentRowDataIndex = null;
+                resetSaveState();
+                resetPrefillUI();
+                closePrefillModal();
+            }
+
+            function openPopup(url) {
+                document.getElementById('popupContent').innerHTML =
+                    `<iframe src="${url}" allow="autoplay"></iframe>`;
+                document.getElementById('popupOverlay').style.display = 'block';
+                const box = document.getElementById('popupBox');
+                box.style.display = 'block';
+
+                box.style.top = '50%';
+                box.style.left = '';
+                box.style.right = '20px';
+                box.style.transform = 'translateY(-50%)';
+            }
+
+            function closePopup() {
+                document.getElementById('popupOverlay').style.display = 'none';
+                document.getElementById('popupBox').style.display = 'none';
+            }
+
+            function setupDrag() {
+                const box = document.getElementById('popupBox');
+                const header = document.getElementById('popupHeader');
+
+                let isDragging = false;
+                let startX = 0, startY = 0;
+                let startLeft = 0, startTop = 0;
+
+                function onMouseDown(e) {
+                    if (box.style.display !== 'block') return;
+
+                    isDragging = true;
+
+                    const rect = box.getBoundingClientRect();
+                    startX = e.clientX;
+                    startY = e.clientY;
+                    startLeft = rect.left;
+                    startTop = rect.top;
+
+                    box.style.transform = 'none';
+                    box.style.left = `${startLeft}px`;
+                    box.style.top = `${startTop}px`;
+                    box.style.right = 'auto';
+
+                    document.addEventListener('mousemove', onMouseMove);
+                    document.addEventListener('mouseup', onMouseUp);
                 }
-            });
-        }
 
-        function resetDisplay() {
-            document.getElementById('nipInput').value = '';
-            document.getElementById('result').innerHTML = '';
-            currentRowIndex = null;
-            currentRowDataIndex = null;
-            resetSaveState();
-            resetPrefillUI();
-            closePrefillModal();
-        }
+                function onMouseMove(e) {
+                    if (!isDragging) return;
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
 
-        function openPopup(url) {
-            document.getElementById('popupContent').innerHTML =
-                `<iframe src="${url}" allow="autoplay"></iframe>`;
-            document.getElementById('popupOverlay').style.display = 'block';
-            const box = document.getElementById('popupBox');
-            box.style.display = 'block';
+                    let nextLeft = startLeft + dx;
+                    let nextTop = startTop + dy;
 
-            box.style.top = '50%';
-            box.style.left = '';
-            box.style.right = '20px';
-            box.style.transform = 'translateY(-50%)';
-        }
+                    const vw = window.innerWidth;
+                    const vh = window.innerHeight;
+                    const rect = box.getBoundingClientRect();
 
-        function closePopup() {
-            document.getElementById('popupOverlay').style.display = 'none';
-            document.getElementById('popupBox').style.display = 'none';
-        }
+                    if (nextLeft < 8) nextLeft = 8;
+                    if (nextLeft + rect.width > vw - 8) nextLeft = vw - rect.width - 8;
 
-        function setupDrag() {
-            const box = document.getElementById('popupBox');
-            const header = document.getElementById('popupHeader');
+                    if (nextTop < 8) nextTop = 8;
+                    if (nextTop + rect.height > vh - 8) nextTop = vh - rect.height - 8;
 
-            let isDragging = false;
-            let startX = 0, startY = 0;
-            let startLeft = 0, startTop = 0;
-
-            function onMouseDown(e) {
-                if (box.style.display !== 'block') return;
-
-                isDragging = true;
-
-                const rect = box.getBoundingClientRect();
-                startX = e.clientX;
-                startY = e.clientY;
-                startLeft = rect.left;
-                startTop = rect.top;
-
-                box.style.transform = 'none';
-                box.style.left = `${startLeft}px`;
-                box.style.top = `${startTop}px`;
-                box.style.right = 'auto';
-
-                document.addEventListener('mousemove', onMouseMove);
-                document.addEventListener('mouseup', onMouseUp);
-            }
-
-            function onMouseMove(e) {
-                if (!isDragging) return;
-                const dx = e.clientX - startX;
-                const dy = e.clientY - startY;
-
-                let nextLeft = startLeft + dx;
-                let nextTop = startTop + dy;
-
-                const vw = window.innerWidth;
-                const vh = window.innerHeight;
-                const rect = box.getBoundingClientRect();
-
-                if (nextLeft < 8) nextLeft = 8;
-                if (nextLeft + rect.width > vw - 8) nextLeft = vw - rect.width - 8;
-
-                if (nextTop < 8) nextTop = 8;
-                if (nextTop + rect.height > vh - 8) nextTop = vh - rect.height - 8;
-
-                box.style.left = `${nextLeft}px`;
-                box.style.top = `${nextTop}px`;
-            }
-
-            function onMouseUp() {
-                isDragging = false;
-                document.removeEventListener('mousemove', onMouseMove);
-                document.removeEventListener('mouseup', onMouseUp);
-            }
-
-            header.addEventListener('mousedown', onMouseDown);
-
-            document.addEventListener('keydown', (e) => {
-                if (e.key === 'Escape') {
-                    closePopup();
-                    closePreviewModal();
-                    closePrefillModal();
-                    closeUploadModal();
+                    box.style.left = `${nextLeft}px`;
+                    box.style.top = `${nextTop}px`;
                 }
-            });
 
-            window.addEventListener('resize', () => {
-                if (box.style.display !== 'block') return;
-                const rect = box.getBoundingClientRect();
-                let left = rect.left;
-                let top = rect.top;
+                function onMouseUp() {
+                    isDragging = false;
+                    document.removeEventListener('mousemove', onMouseMove);
+                    document.removeEventListener('mouseup', onMouseUp);
+                }
 
-                const vw = window.innerWidth;
-                const vh = window.innerHeight;
-                if (left + rect.width > vw - 8) left = vw - rect.width - 8;
-                if (top + rect.height > vh - 8) top = vh - rect.height - 8;
-                if (left < 8) left = 8;
-                if (top < 8) top = 8;
+                header.addEventListener('mousedown', onMouseDown);
 
-                box.style.left = `${left}px`;
-                box.style.top = `${top}px`;
-            });
-        }
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        closePopup();
+                        closePreviewModal();
+                        closePrefillModal();
+                        closeUploadModal();
+                    }
+                });
 
-        // Upload functionality
-        let currentUploadColumnIndex = null;
-        let currentUploadFolderId = null;
-        let selectedFile = null;
+                window.addEventListener('resize', () => {
+                    if (box.style.display !== 'block') return;
+                    const rect = box.getBoundingClientRect();
+                    let left = rect.left;
+                    let top = rect.top;
 
-        function openUploadModal(columnIndex, uploadFolderUrl) {
-            currentUploadColumnIndex = columnIndex;
-            // Extract folder ID from URL
-            const folderIdMatch = uploadFolderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
-            currentUploadFolderId = folderIdMatch ? folderIdMatch[1] : UPLOAD_FOLDER_IDS[columnIndex];
-            
-            const modal = document.getElementById('uploadModal');
-            const overlay = document.getElementById('uploadModalOverlay');
-            const modalTitle = document.getElementById('uploadModalTitle');
-            
-            if (!modal || !overlay) return;
-            
-            // Update modal title with field name
-            const fieldName = headerMap[columnIndex] || `Kolom ${columnIndex + 1}`;
-            modalTitle.textContent = `Upload File: ${fieldName}`;
-            
-            // Reset form
-            resetUploadForm();
-            
-            // Show modal
-            overlay.style.display = 'block';
-            modal.style.display = 'block';
-            modal.setAttribute('aria-hidden', 'false');
-        }
+                    const vw = window.innerWidth;
+                    const vh = window.innerHeight;
+                    if (left + rect.width > vw - 8) left = vw - rect.width - 8;
+                    if (top + rect.height > vh - 8) top = vh - rect.height - 8;
+                    if (left < 8) left = 8;
+                    if (top < 8) top = 8;
 
-        function closeUploadModal() {
-            const modal = document.getElementById('uploadModal');
-            const overlay = document.getElementById('uploadModalOverlay');
-            
-            if (!modal || !overlay) return;
-            
-            overlay.style.display = 'none';
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-            
-            // Reset form and variables
-            resetUploadForm();
-            currentUploadColumnIndex = null;
-            currentUploadFolderId = null;
-            selectedFile = null;
-        }
-
-        function resetUploadForm() {
-            const fileInput = document.getElementById('fileInput');
-            const fileInfo = document.getElementById('fileInfo');
-            const uploadStep1 = document.getElementById('uploadStep1');
-            const uploadStep2 = document.getElementById('uploadStep2');
-            const uploadStep3 = document.getElementById('uploadStep3');
-            const saveBtn = document.getElementById('saveUploadBtn');
-            const uploadProgress = document.getElementById('uploadProgress');
-            const uploadButton = document.getElementById('uploadButton');
-            const uploadProgressFill = document.getElementById('uploadProgressFill');
-            const uploadProgressText = document.getElementById('uploadProgressText');
-            
-            if (fileInput) fileInput.value = '';
-            if (fileInfo) fileInfo.style.display = 'none';
-            if (uploadStep1) uploadStep1.classList.remove('completed');
-            if (uploadStep2) {
-                uploadStep2.style.display = 'none';
-                uploadStep2.classList.remove('completed');
+                    box.style.left = `${left}px`;
+                    box.style.top = `${top}px`;
+                });
             }
-            if (uploadStep3) {
-                uploadStep3.style.display = 'none';
-                uploadStep3.classList.remove('completed');
+
+            // Upload functionality
+            let currentUploadColumnIndex = null;
+            let currentUploadFolderId = null;
+            let selectedFile = null;
+
+            function openUploadModal(columnIndex, uploadFolderUrl) {
+                currentUploadColumnIndex = columnIndex;
+                // Extract folder ID from URL
+                const folderIdMatch = uploadFolderUrl.match(/folders\/([a-zA-Z0-9_-]+)/);
+                currentUploadFolderId = folderIdMatch ? folderIdMatch[1] : UPLOAD_FOLDER_IDS[columnIndex];
+
+                const modal = document.getElementById('uploadModal');
+                const overlay = document.getElementById('uploadModalOverlay');
+                const modalTitle = document.getElementById('uploadModalTitle');
+
+                if (!modal || !overlay) return;
+
+                // Update modal title with field name
+                const fieldName = headerMap[columnIndex] || `Kolom ${columnIndex + 1}`;
+                modalTitle.textContent = `Upload File: ${fieldName}`;
+
+                // Reset form
+                resetUploadForm();
+
+                // Show modal
+                overlay.style.display = 'block';
+                modal.style.display = 'block';
+                modal.setAttribute('aria-hidden', 'false');
             }
-            if (saveBtn) saveBtn.style.display = 'none';
-            if (uploadProgress) uploadProgress.style.display = 'none';
-            
-            // Reset upload button to initial state
-            if (uploadButton) {
-                uploadButton.disabled = false;
-                uploadButton.innerHTML = `
+
+            function closeUploadModal() {
+                const modal = document.getElementById('uploadModal');
+                const overlay = document.getElementById('uploadModalOverlay');
+
+                if (!modal || !overlay) return;
+
+                overlay.style.display = 'none';
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+
+                // Reset form and variables
+                resetUploadForm();
+                currentUploadColumnIndex = null;
+                currentUploadFolderId = null;
+                selectedFile = null;
+            }
+
+            function resetUploadForm() {
+                const fileInput = document.getElementById('fileInput');
+                const fileInfo = document.getElementById('fileInfo');
+                const uploadStep1 = document.getElementById('uploadStep1');
+                const uploadStep2 = document.getElementById('uploadStep2');
+                const uploadStep3 = document.getElementById('uploadStep3');
+                const saveBtn = document.getElementById('saveUploadBtn');
+                const uploadProgress = document.getElementById('uploadProgress');
+                const uploadButton = document.getElementById('uploadButton');
+                const uploadProgressFill = document.getElementById('uploadProgressFill');
+                const uploadProgressText = document.getElementById('uploadProgressText');
+
+                if (fileInput) fileInput.value = '';
+                if (fileInfo) fileInfo.style.display = 'none';
+                if (uploadStep1) uploadStep1.classList.remove('completed');
+                if (uploadStep2) {
+                    uploadStep2.style.display = 'none';
+                    uploadStep2.classList.remove('completed');
+                }
+                if (uploadStep3) {
+                    uploadStep3.style.display = 'none';
+                    uploadStep3.classList.remove('completed');
+                }
+                if (saveBtn) saveBtn.style.display = 'none';
+                if (uploadProgress) uploadProgress.style.display = 'none';
+
+                // Reset upload button to initial state
+                if (uploadButton) {
+                    uploadButton.disabled = false;
+                    uploadButton.innerHTML = `
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                         <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
                     </svg>
                     Upload File
                 `;
-            }
-            
-            // Reset progress bar and text
-            if (uploadProgressFill) uploadProgressFill.style.width = '0%';
-            if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
-            
-            selectedFile = null;
-        }
+                }
 
-        function handleFileSelect() {
-            const fileInput = document.getElementById('fileInput');
-            const fileInfo = document.getElementById('fileInfo');
-            const fileInfoName = fileInfo.querySelector('.file-info__name');
-            const fileInfoSize = fileInfo.querySelector('.file-info__size');
-            const uploadStep1 = document.getElementById('uploadStep1');
-            const uploadStep2 = document.getElementById('uploadStep2');
-            
-            if (!fileInput.files || !fileInput.files[0]) {
+                // Reset progress bar and text
+                if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+                if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
+
                 selectedFile = null;
-                fileInfo.style.display = 'none';
-                uploadStep1.classList.remove('completed');
-                uploadStep2.style.display = 'none';
-                return;
-            }
-            
-            selectedFile = fileInput.files[0];
-            
-            // Display file info
-            if (fileInfoName) fileInfoName.textContent = selectedFile.name;
-            if (fileInfoSize) fileInfoSize.textContent = formatFileSize(selectedFile.size);
-            fileInfo.style.display = 'block';
-            
-            // Mark step 1 as completed and show step 2
-            uploadStep1.classList.add('completed');
-            uploadStep2.style.display = 'block';
-        }
-
-        function formatFileSize(bytes) {
-            if (bytes === 0) return '0 Bytes';
-            const k = 1024;
-            const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-            const i = Math.floor(Math.log(bytes) / Math.log(k));
-            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-        }
-
-        function uploadFile() {
-            if (!selectedFile || !currentUploadFolderId || currentUploadColumnIndex === null) {
-                showNotification('Pilih file terlebih dahulu.', 'error');
-                return;
             }
 
-            if (!google || !google.script || !google.script.run) {
-                showNotification('Fitur upload hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                return;
+            function handleFileSelect() {
+                const fileInput = document.getElementById('fileInput');
+                const fileInfo = document.getElementById('fileInfo');
+                const fileInfoName = fileInfo.querySelector('.file-info__name');
+                const fileInfoSize = fileInfo.querySelector('.file-info__size');
+                const uploadStep1 = document.getElementById('uploadStep1');
+                const uploadStep2 = document.getElementById('uploadStep2');
+
+                if (!fileInput.files || !fileInput.files[0]) {
+                    selectedFile = null;
+                    fileInfo.style.display = 'none';
+                    uploadStep1.classList.remove('completed');
+                    uploadStep2.style.display = 'none';
+                    return;
+                }
+
+                selectedFile = fileInput.files[0];
+
+                // Display file info
+                if (fileInfoName) fileInfoName.textContent = selectedFile.name;
+                if (fileInfoSize) fileInfoSize.textContent = formatFileSize(selectedFile.size);
+                fileInfo.style.display = 'block';
+
+                // Mark step 1 as completed and show step 2
+                uploadStep1.classList.add('completed');
+                uploadStep2.style.display = 'block';
             }
 
-            const uploadButton = document.getElementById('uploadButton');
-            const uploadProgress = document.getElementById('uploadProgress');
-            const uploadProgressFill = document.getElementById('uploadProgressFill');
-            const uploadProgressText = document.getElementById('uploadProgressText');
-            
-            // Show loading state
-            uploadButton.disabled = true;
-            uploadButton.innerHTML = '<span>Mengupload...</span>';
-            uploadProgress.style.display = 'block';
-            
-            // Simulate progress (since we can't get real progress from Google Apps Script)
-            let progress = 0;
-            const progressInterval = setInterval(() => {
-                progress += Math.random() * 15;
-                if (progress > 90) progress = 90;
-                uploadProgressFill.style.width = progress + '%';
-                uploadProgressText.textContent = `Mengupload... ${Math.round(progress)}%`;
-            }, 200);
+            function formatFileSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            }
 
-            // Convert file to base64 for transfer
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const fileData = {
-                    content: e.target.result.split(',')[1], // Remove data:mime;base64, prefix
-                    name: selectedFile.name,
-                    mimeType: selectedFile.type,
-                    folderId: currentUploadFolderId
-                };
+            function uploadFile() {
+                if (!selectedFile || !currentUploadFolderId || currentUploadColumnIndex === null) {
+                    showNotification('Pilih file terlebih dahulu.', 'error');
+                    return;
+                }
 
-                google.script.run
-                    .withSuccessHandler((result) => {
-                        clearInterval(progressInterval);
-                        uploadProgressFill.style.width = '100%';
-                        uploadProgressText.textContent = 'Upload berhasil!';
-                        
-                        setTimeout(() => {
-                            handleUploadSuccess(result);
-                        }, 500);
-                    })
-                    .withFailureHandler((error) => {
-                        clearInterval(progressInterval);
-                        console.error('Upload error:', error);
-                        
-                        // Reset upload button
-                        uploadButton.disabled = false;
-                        uploadButton.innerHTML = `
+                if (!google || !google.script || !google.script.run) {
+                    showNotification('Fitur upload hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
+                    return;
+                }
+
+                const uploadButton = document.getElementById('uploadButton');
+                const uploadProgress = document.getElementById('uploadProgress');
+                const uploadProgressFill = document.getElementById('uploadProgressFill');
+                const uploadProgressText = document.getElementById('uploadProgressText');
+
+                // Show loading state
+                uploadButton.disabled = true;
+                uploadButton.innerHTML = '<span>Mengupload...</span>';
+                uploadProgress.style.display = 'block';
+
+                // Simulate progress (since we can't get real progress from Google Apps Script)
+                let progress = 0;
+                const progressInterval = setInterval(() => {
+                    progress += Math.random() * 15;
+                    if (progress > 90) progress = 90;
+                    uploadProgressFill.style.width = progress + '%';
+                    uploadProgressText.textContent = `Mengupload... ${Math.round(progress)}%`;
+                }, 200);
+
+                // Convert file to base64 for transfer
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    const fileData = {
+                        content: e.target.result.split(',')[1], // Remove data:mime;base64, prefix
+                        name: selectedFile.name,
+                        mimeType: selectedFile.type,
+                        folderId: currentUploadFolderId
+                    };
+
+                    google.script.run
+                        .withSuccessHandler((result) => {
+                            clearInterval(progressInterval);
+                            uploadProgressFill.style.width = '100%';
+                            uploadProgressText.textContent = 'Upload berhasil!';
+
+                            setTimeout(() => {
+                                handleUploadSuccess(result);
+                            }, 500);
+                        })
+                        .withFailureHandler((error) => {
+                            clearInterval(progressInterval);
+                            console.error('Upload error:', error);
+
+                            // Reset upload button
+                            uploadButton.disabled = false;
+                            uploadButton.innerHTML = `
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
                             </svg>
                             Upload File
                         `;
-                        uploadProgress.style.display = 'none';
-                        
-                        // Reset progress bar and text
-                        uploadProgressFill.style.width = '0%';
-                        uploadProgressText.textContent = 'Mengupload...';
-                        
-                        showNotification('Gagal mengupload file: ' + (error.message || error), 'error');
-                    })
-                    .uploadFileToDrive(fileData);
-            };
-            
-            reader.readAsDataURL(selectedFile);
-        }
+                            uploadProgress.style.display = 'none';
 
-        function handleUploadSuccess(result) {
-            console.log('Upload result:', result); // Debug log
-            
-            let fileUrl = null;
-            let fileName = selectedFile ? selectedFile.name : 'Unknown file';
-            
-            // Handle different response formats
-            if (typeof result === 'string') {
-                // If result is just a URL string
-                fileUrl = result;
-            } else if (result && typeof result === 'object') {
-                // If result is an object, try to extract URL
-                fileUrl = result.url || result.fileUrl || result.getUrl || null;
-                if (result.fileName) fileName = result.fileName;
+                            // Reset progress bar and text
+                            uploadProgressFill.style.width = '0%';
+                            uploadProgressText.textContent = 'Mengupload...';
+
+                            showNotification('Gagal mengupload file: ' + (error.message || error), 'error');
+                        })
+                        .uploadFileToDrive(fileData);
+                };
+
+                reader.readAsDataURL(selectedFile);
             }
-            
-            console.log('Extracted file URL:', fileUrl); // Debug log
-            
-            if (!fileUrl || fileUrl === '') {
-                console.error('No URL found in result:', result);
-                showNotification('Upload berhasil tapi URL tidak ditemukan. Coba refresh halaman.', 'error');
-                
-                // Reset upload button untuk retry
-                const uploadButton = document.getElementById('uploadButton');
-                if (uploadButton) {
-                    uploadButton.disabled = false;
-                    uploadButton.innerHTML = `
+
+            function handleUploadSuccess(result) {
+                console.log('Upload result:', result); // Debug log
+
+                let fileUrl = null;
+                let fileName = selectedFile ? selectedFile.name : 'Unknown file';
+
+                // Handle different response formats
+                if (typeof result === 'string') {
+                    // If result is just a URL string
+                    fileUrl = result;
+                } else if (result && typeof result === 'object') {
+                    // If result is an object, try to extract URL
+                    fileUrl = result.url || result.fileUrl || result.getUrl || null;
+                    if (result.fileName) fileName = result.fileName;
+                }
+
+                console.log('Extracted file URL:', fileUrl); // Debug log
+
+                if (!fileUrl || fileUrl === '') {
+                    console.error('No URL found in result:', result);
+                    showNotification('Upload berhasil tapi URL tidak ditemukan. Coba refresh halaman.', 'error');
+
+                    // Reset upload button untuk retry
+                    const uploadButton = document.getElementById('uploadButton');
+                    if (uploadButton) {
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = `
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
                         </svg>
                         Upload File
                     `;
-                }
-                
-                const uploadProgress = document.getElementById('uploadProgress');
-                if (uploadProgress) uploadProgress.style.display = 'none';
-                
-                // Reset progress bar and text
-                const uploadProgressFill = document.getElementById('uploadProgressFill');
-                const uploadProgressText = document.getElementById('uploadProgressText');
-                if (uploadProgressFill) uploadProgressFill.style.width = '0%';
-                if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
-                
-                return;
-            }
-
-            const uploadStep2 = document.getElementById('uploadStep2');
-            const uploadStep3 = document.getElementById('uploadStep3');
-            const uploadResult = document.getElementById('uploadResult');
-            const uploadResultFile = uploadResult.querySelector('.upload-result__file');
-            const uploadResultUrl = uploadResult.querySelector('.upload-result__url');
-            const saveBtn = document.getElementById('saveUploadBtn');
-            
-            // Hide step 2, show step 3
-            if (uploadStep2) uploadStep2.style.display = 'none';
-            if (uploadStep3) {
-                uploadStep3.style.display = 'block';
-                uploadStep3.classList.add('completed');
-            }
-            
-            // Show file result
-            if (uploadResultFile) uploadResultFile.textContent = `âœ… ${fileName}`;
-            if (uploadResultUrl) uploadResultUrl.textContent = fileUrl;
-            
-            // Show finish button
-            if (saveBtn) saveBtn.style.display = 'inline-block';
-            
-            // Update the spreadsheet with new URL
-            updateSpreadsheetWithNewFile(fileUrl);
-        }
-
-        function updateSpreadsheetWithNewFile(fileUrl) {
-            console.log('Updating spreadsheet with URL:', fileUrl); // Debug log
-            
-            if (currentRowIndex === null || currentUploadColumnIndex === null) {
-                console.error('Invalid data for update:', { currentRowIndex, currentUploadColumnIndex });
-                showNotification('Data tidak valid untuk update.', 'error');
-                return;
-            }
-
-            const updates = { [currentUploadColumnIndex]: fileUrl };
-            console.log('Spreadsheet updates:', updates); // Debug log
-
-            if (!google || !google.script || !google.script.run) {
-                console.error('Google Apps Script not available');
-                showNotification('Google Apps Script tidak tersedia. URL: ' + fileUrl, 'error');
-                return;
-            }
-
-            google.script.run
-                .withSuccessHandler((updateResult) => {
-                    console.log('Spreadsheet update result:', updateResult); // Debug log
-                    
-                    // Update local data table
-                    if (dataTable && currentRowDataIndex !== null) {
-                        dataTable.setValue(currentRowDataIndex, currentUploadColumnIndex, fileUrl);
                     }
 
-                    // Update the "Lihat File" link
-                    updateViewFileLink(currentUploadColumnIndex, fileUrl);
-                    
-                    const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
-                    showNotification(`${fieldName} berhasil diupload dan tersimpan. Link "Lihat File" telah diperbarui.`, 'success');
-                    
-                    // Close upload modal after a short delay to show the updated link
-                    setTimeout(() => {
-                        finalizeUpload();
-                    }, 2000);
-                })
-                .withFailureHandler((error) => {
-                    console.error('Spreadsheet update error:', error);
-                    showNotification('File berhasil diupload ke: ' + fileUrl + ' tapi gagal update database. Error: ' + error.message, 'error');
-                })
-                .updateRowFields(currentRowIndex, updates);
-        }
+                    const uploadProgress = document.getElementById('uploadProgress');
+                    if (uploadProgress) uploadProgress.style.display = 'none';
 
-        function finalizeUpload() {
-            // Show final notification that file is ready to view
-            if (currentUploadColumnIndex !== null) {
-                const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
-                showNotification(`File ${fieldName} siap dilihat dengan link yang telah diperbarui.`, 'success');
-            }
-            closeUploadModal();
-        }
+                    // Reset progress bar and text
+                    const uploadProgressFill = document.getElementById('uploadProgressFill');
+                    const uploadProgressText = document.getElementById('uploadProgressText');
+                    if (uploadProgressFill) uploadProgressFill.style.width = '0%';
+                    if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
 
-        function validateUploadUrl() {
-            // This function is no longer needed for direct upload
-            // Keeping for backward compatibility
-        }
-
-        function saveUploadedFile() {
-            // This function is replaced by updateSpreadsheetWithNewFile
-            // Keeping for backward compatibility
-            finalizeUpload();
-        }
-
-        function updateViewFileLink(columnIndex, newUrl) {
-            if (!newUrl) return;
-            
-            let fileId = null;
-            
-            // Try multiple patterns to extract file ID from various Google Drive URL formats
-            const patterns = [
-                /\/file\/d\/([a-zA-Z0-9_-]+)/, // https://drive.google.com/file/d/FILE_ID/...
-                /id=([a-zA-Z0-9_-]+)/, // ?id=FILE_ID
-                /\/open\?id=([a-zA-Z0-9_-]+)/, // /open?id=FILE_ID
-                /\/view\?id=([a-zA-Z0-9_-]+)/, // /view?id=FILE_ID
-                /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/ // General pattern for 25+ char IDs
-            ];
-            
-            for (const pattern of patterns) {
-                const match = newUrl.match(pattern);
-                if (match && match[1]) {
-                    fileId = match[1];
-                    break;
+                    return;
                 }
+
+                const uploadStep2 = document.getElementById('uploadStep2');
+                const uploadStep3 = document.getElementById('uploadStep3');
+                const uploadResult = document.getElementById('uploadResult');
+                const uploadResultFile = uploadResult.querySelector('.upload-result__file');
+                const uploadResultUrl = uploadResult.querySelector('.upload-result__url');
+                const saveBtn = document.getElementById('saveUploadBtn');
+
+                // Hide step 2, show step 3
+                if (uploadStep2) uploadStep2.style.display = 'none';
+                if (uploadStep3) {
+                    uploadStep3.style.display = 'block';
+                    uploadStep3.classList.add('completed');
+                }
+
+                // Show file result
+                if (uploadResultFile) uploadResultFile.textContent = `✅ ${fileName}`;
+                if (uploadResultUrl) uploadResultUrl.textContent = fileUrl;
+
+                // Show finish button
+                if (saveBtn) saveBtn.style.display = 'inline-block';
+
+                // Update the spreadsheet with new URL
+                updateSpreadsheetWithNewFile(fileUrl);
             }
 
-            if (fileId) {
-                const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
-                const displayDiv = document.getElementById(`file_display_${columnIndex}`);
-                
-                console.log('Updating view file link for column:', columnIndex, 'with URL:', embedUrl); // Debug log
-                
-                if (displayDiv) {
-                    const linkElement = displayDiv.querySelector('.lihat-link');
-                    if (linkElement) {
-                        // Update onclick attribute
-                        linkElement.setAttribute('onclick', `openPopup('${embedUrl}')`);
-                        console.log('Updated lihat-link onclick to:', `openPopup('${embedUrl}')`); // Debug log
-                        
-                        // Also update visual indicator if needed
-                        linkElement.style.color = '#007bff'; // Blue color to indicate it's updated
-                        
-                        // Add a brief flash effect to show it's been updated
-                        linkElement.style.backgroundColor = '#e7f3ff';
+            function updateSpreadsheetWithNewFile(fileUrl) {
+                console.log('Updating spreadsheet with URL:', fileUrl); // Debug log
+
+                if (currentRowIndex === null || currentUploadColumnIndex === null) {
+                    console.error('Invalid data for update:', { currentRowIndex, currentUploadColumnIndex });
+                    showNotification('Data tidak valid untuk update.', 'error');
+                    return;
+                }
+
+                const updates = { [currentUploadColumnIndex]: fileUrl };
+                console.log('Spreadsheet updates:', updates); // Debug log
+
+                if (!google || !google.script || !google.script.run) {
+                    console.error('Google Apps Script not available');
+                    showNotification('Google Apps Script tidak tersedia. URL: ' + fileUrl, 'error');
+                    return;
+                }
+
+                google.script.run
+                    .withSuccessHandler((updateResult) => {
+                        console.log('Spreadsheet update result:', updateResult); // Debug log
+
+                        // Update local data table
+                        if (dataTable && currentRowDataIndex !== null) {
+                            dataTable.setValue(currentRowDataIndex, currentUploadColumnIndex, fileUrl);
+                        }
+
+                        // Update the "Lihat File" link
+                        updateViewFileLink(currentUploadColumnIndex, fileUrl);
+
+                        const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
+                        showNotification(`${fieldName} berhasil diupload dan tersimpan. Link "Lihat File" telah diperbarui.`, 'success');
+
+                        // Close upload modal after a short delay to show the updated link
                         setTimeout(() => {
-                            linkElement.style.backgroundColor = '';
-                        }, 1000);
-                        
-                        // Update the title to show it's been updated
-                        linkElement.setAttribute('title', 'File telah diperbarui - Klik untuk melihat');
+                            finalizeUpload();
+                        }, 2000);
+                    })
+                    .withFailureHandler((error) => {
+                        console.error('Spreadsheet update error:', error);
+                        showNotification('File berhasil diupload ke: ' + fileUrl + ' tapi gagal update database. Error: ' + error.message, 'error');
+                    })
+                    .updateRowFields(currentRowIndex, updates);
+            }
+
+            function finalizeUpload() {
+                // Show final notification that file is ready to view
+                if (currentUploadColumnIndex !== null) {
+                    const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
+                    showNotification(`File ${fieldName} siap dilihat dengan link yang telah diperbarui.`, 'success');
+                }
+                closeUploadModal();
+            }
+
+            function validateUploadUrl() {
+                // This function is no longer needed for direct upload
+                // Keeping for backward compatibility
+            }
+
+            function saveUploadedFile() {
+                // This function is replaced by updateSpreadsheetWithNewFile
+                // Keeping for backward compatibility
+                finalizeUpload();
+            }
+
+            function updateViewFileLink(columnIndex, newUrl) {
+                if (!newUrl) return;
+
+                let fileId = null;
+
+                // Try multiple patterns to extract file ID from various Google Drive URL formats
+                const patterns = [
+                    /\/file\/d\/([a-zA-Z0-9_-]+)/, // https://drive.google.com/file/d/FILE_ID/...
+                    /id=([a-zA-Z0-9_-]+)/, // ?id=FILE_ID
+                    /\/open\?id=([a-zA-Z0-9_-]+)/, // /open?id=FILE_ID
+                    /\/view\?id=([a-zA-Z0-9_-]+)/, // /view?id=FILE_ID
+                    /drive\.google\.com.*?([a-zA-Z0-9_-]{25,})/ // General pattern for 25+ char IDs
+                ];
+
+                for (const pattern of patterns) {
+                    const match = newUrl.match(pattern);
+                    if (match && match[1]) {
+                        fileId = match[1];
+                        break;
+                    }
+                }
+
+                if (fileId) {
+                    const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
+                    const displayDiv = document.getElementById(`file_display_${columnIndex}`);
+
+                    console.log('Updating view file link for column:', columnIndex, 'with URL:', embedUrl); // Debug log
+
+                    if (displayDiv) {
+                        const linkElement = displayDiv.querySelector('.lihat-link');
+                        if (linkElement) {
+                            // Update onclick attribute
+                            linkElement.setAttribute('onclick', `openPopup('${embedUrl}')`);
+                            console.log('Updated lihat-link onclick to:', `openPopup('${embedUrl}')`); // Debug log
+
+                            // Also update visual indicator if needed
+                            linkElement.style.color = '#007bff'; // Blue color to indicate it's updated
+
+                            // Add a brief flash effect to show it's been updated
+                            linkElement.style.backgroundColor = '#e7f3ff';
+                            setTimeout(() => {
+                                linkElement.style.backgroundColor = '';
+                            }, 1000);
+
+                            // Update the title to show it's been updated
+                            linkElement.setAttribute('title', 'File telah diperbarui - Klik untuk melihat');
+                        } else {
+                            console.log('Link element not found in displayDiv'); // Debug log
+                        }
                     } else {
-                        console.log('Link element not found in displayDiv'); // Debug log
+                        console.log('DisplayDiv not found for column:', columnIndex); // Debug log
                     }
                 } else {
-                    console.log('DisplayDiv not found for column:', columnIndex); // Debug log
+                    console.log('Could not extract file ID from URL:', newUrl); // Debug log
                 }
-            } else {
-                console.log('Could not extract file ID from URL:', newUrl); // Debug log
             }
-        }
 
-        // Setup upload modal
-        function setupUploadModal() {
-            const overlay = document.getElementById('uploadModalOverlay');
-            if (overlay) {
-                overlay.addEventListener('click', closeUploadModal);
+            // Setup upload modal
+            function setupUploadModal() {
+                const overlay = document.getElementById('uploadModalOverlay');
+                if (overlay) {
+                    overlay.addEventListener('click', closeUploadModal);
+                }
             }
-        }
 
-        // Add to init function
-        function initUpload() {
-            setupUploadModal();
-        }
+            // Add to init function
+            function initUpload() {
+                setupUploadModal();
+            }
 
 
-    </script>
+        </script>
 
     </div> <!-- End main-content -->
 
 </body>
 
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
