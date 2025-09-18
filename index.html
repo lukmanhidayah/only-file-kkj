@@ -465,95 +465,6 @@
             color: #374151;
         }
 
-        .file-actions {
-            display: flex;
-            padding: 5px 10px;
-            border: 1px solid #eee;
-            border-radius: 10px;
-            align-items: center;
-            gap: 12px;
-            margin-top: 8px;
-        }
-
-        .file-status {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .file-radio {
-            margin: 0 4px 0 0;
-            cursor: pointer;
-        }
-
-        .file-radio-label {
-            cursor: pointer;
-            user-select: none;
-            padding: 4px 8px;
-            border-radius: 4px;
-            transition: background-color 0.2s;
-        }
-
-        .file-radio-label.sesuai {
-            color: #059669;
-        }
-
-        .file-radio-label.tidak-sesuai {
-            color: #dc2626;
-        }
-
-        .file-radio-label:hover {
-            background-color: #f3f4f6;
-        }
-
-        .file-radio:checked+.file-radio-label.sesuai {
-            background-color: #d1fae5;
-            font-weight: 500;
-        }
-
-        .file-radio:checked+.file-radio-label.tidak-sesuai {
-            background-color: #fee2e2;
-            font-weight: 500;
-        }
-
-        /* Loading state for radio buttons */
-        .file-radio-label.loading {
-            opacity: 0.6;
-            pointer-events: none;
-            position: relative;
-        }
-
-        .file-radio-label.loading::after {
-            content: "";
-            position: absolute;
-            width: 12px;
-            height: 12px;
-            margin: auto;
-            border: 1px solid transparent;
-            border-top-color: #6b7280;
-            border-radius: 50%;
-            animation: radio-loading-spinner 1s ease infinite;
-            top: 50%;
-            right: 4px;
-            transform: translateY(-50%);
-        }
-
-        @keyframes radio-loading-spinner {
-            from {
-                transform: translateY(-50%) rotate(0turn);
-            }
-
-            to {
-                transform: translateY(-50%) rotate(1turn);
-            }
-        }
-
-        .file-radio:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
         .file-display {
             margin-bottom: 8px;
         }
@@ -1570,16 +1481,6 @@
         // Columns that require single quote prefix: No. Sertifikat, Tgl. Sertifikat, NIP, TMT Kenaikan Pangkat Terakhir, Nilai PAK Konversi Terakhir
         const SINGLE_QUOTE_PREFIX_COLUMNS = new Set([4, 5, 6, 10, 15]);
 
-        const FILE_STATUS_MAP = {
-            2: 3,
-            17: 18,
-            19: 20,
-            21: 22,
-            23: 24,
-            25: 26,
-            27: 28,
-            29: 30
-        };
 
         // Upload link mapping for different file types
         const UPLOAD_LINKS_MAP = {
@@ -1720,66 +1621,8 @@
                                 const fileId = fileIdMatch[1];
                                 const embedUrl = `https://drive.google.com/file/d/${fileId}/preview`;
 
-                                // Get status column index and current status
-                                const statusColIndex = FILE_STATUS_MAP[j];
-                                let currentStatus = '';
-                                if (statusColIndex !== undefined) {
-                                    currentStatus = dataTable.getFormattedValue(i, statusColIndex) || '';
-                                }
-
                                 // Get upload link for this file type
                                 const uploadLink = UPLOAD_LINKS_MAP[j];
-
-                                let fileActionsHtml = '';
-                                if (statusColIndex !== undefined) {
-                                    const isSesuai = currentStatus.toLowerCase().includes('sesuai') && !currentStatus.toLowerCase().includes('tidak');
-                                    const isTidakSesuai = currentStatus.toLowerCase().includes('tidak sesuai');
-
-                                    fileActionsHtml = `
-                                    <div class="file-actions">
-                                        <div class="file-status-header">
-                                            Status Verifikasi
-                                        </div>
-                                        <div class="file-status">
-                                            <input type="radio" 
-                                                   id="sesuai_${j}" 
-                                                   name="status_${j}"
-                                                   class="file-radio" 
-                                                   data-col-index="${j}"
-                                                   data-status-col="${statusColIndex}"
-                                                   data-status-type="sesuai"
-                                                   value="sesuai"
-                                                   ${isSesuai ? 'checked' : ''}
-                                                   onchange="updateFileStatus(this)">
-                                            <label for="sesuai_${j}" class="file-radio-label sesuai">Sesuai</label>
-                                            
-                                            <input type="radio" 
-                                                   id="tidak_sesuai_${j}" 
-                                                   name="status_${j}"
-                                                   class="file-radio" 
-                                                   data-col-index="${j}"
-                                                   data-status-col="${statusColIndex}"
-                                                   data-status-type="tidak_sesuai"
-                                                   value="tidak_sesuai"
-                                                   ${isTidakSesuai ? 'checked' : ''}
-                                                   onchange="updateFileStatus(this)">
-                                            <label for="tidak_sesuai_${j}" class="file-radio-label tidak-sesuai">Tidak Sesuai</label>
-                                            
-                                            <input type="radio" 
-                                                   id="kosong_${j}" 
-                                                   name="status_${j}"
-                                                   class="file-radio" 
-                                                   data-col-index="${j}"
-                                                   data-status-col="${statusColIndex}"
-                                                   data-status-type="kosong"
-                                                   value=""
-                                                   ${!isSesuai && !isTidakSesuai ? 'checked' : ''}
-                                                   onchange="updateFileStatus(this)">
-                                            <label for="kosong_${j}" class="file-radio-label">Belum Ditentukan</label>
-                                        </div>
-                                    </div>
-                                `;
-                                }
 
                                 htmlParts.push(`
                                 <div class="field">
@@ -1807,7 +1650,6 @@
                                                 </button>` : ''}
                                             </div>
                                         </div>
-                                        ${fileActionsHtml}
                                     </div>
                                 </div>`);
                                 continue;
@@ -1864,15 +1706,6 @@
             }
         }
 
-        function setRadioLoading(label, isLoading) {
-            if (!label) return;
-
-            if (isLoading) {
-                label.classList.add('loading');
-            } else {
-                label.classList.remove('loading');
-            }
-        }
         function setSavingState(state) {
             isSaving = state;
             const button = document.getElementById('saveChangesBtn');
@@ -2648,21 +2481,6 @@
                 }
             });
 
-            // Check file verification status and update Keterangan
-            const keteranganStatus = checkFileVerificationStatus();
-            const keteranganColIndex = 31; // Kolom Keterangan
-            const currentKeterangan = dataTable.getValue(currentRowDataIndex, keteranganColIndex) || '';
-
-            if (keteranganStatus !== currentKeterangan.trim()) {
-                updates[keteranganColIndex] = keteranganStatus;
-                // Note: Keterangan changes are not shown in preview/notifications per user request
-                // changeSummaries.push({
-                //     label: 'Keterangan',
-                //     from: formatChangeDisplay(currentKeterangan),
-                //     to: formatChangeDisplay(keteranganStatus)
-                // });
-            }
-
             // Ensure all single quote prefix columns have proper prefix, even if not edited
             SINGLE_QUOTE_PREFIX_COLUMNS.forEach(colIndex => {
                 // Skip if this column was already processed above
@@ -2703,45 +2521,6 @@
 
             pendingChanges = { updates, changeSummaries };
             openPreviewModal(changeSummaries);
-        }
-
-        function checkFileVerificationStatus() {
-            // Define file columns that need verification
-            const fileColumns = [17, 19, 21, 23, 25, 27, 29]; // File columns
-            const statusColumns = [18, 20, 22, 24, 26, 28, 30]; // Their corresponding status columns
-
-            let allSesuai = true;
-            let hasFiles = false;
-
-            for (let i = 0; i < fileColumns.length; i++) {
-                const fileColIndex = fileColumns[i];
-                const statusColIndex = statusColumns[i];
-
-                // Check if there's a file URL in this column
-                const fileValue = dataTable.getValue(currentRowDataIndex, fileColIndex) || '';
-                if (fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
-                    hasFiles = true;
-
-                    // Check the verification status
-                    const statusValue = dataTable.getValue(currentRowDataIndex, statusColIndex) || '';
-                    const isSesuai = statusValue.toString().toLowerCase().includes('sesuai') &&
-                        !statusValue.toString().toLowerCase().includes('tidak');
-
-                    if (!isSesuai) {
-                        allSesuai = false;
-                        break;
-                    }
-                }
-            }
-
-            // Return status based on verification results
-            if (!hasFiles) {
-                return 'BELUM LENGKAP'; // No files uploaded
-            } else if (allSesuai) {
-                return 'LENGKAP'; // All files verified as "Sesuai"
-            } else {
-                return 'BELUM LENGKAP'; // Some files not verified or "Tidak Sesuai"
-            }
         }
 
         function confirmSaveEdits() {
@@ -2808,95 +2587,6 @@
                 .updateRowFields(currentRowIndex, updates);
         }
 
-        function updateFileStatus(radio) {
-            if (currentRowIndex === null || currentRowDataIndex === null) {
-                showNotification('Tidak ada data yang dipilih.', 'error');
-                return;
-            }
-
-            if (!google || !google.script || !google.script.run) {
-                showNotification('Fitur update status hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                return;
-            }
-
-            const statusColIndex = parseInt(radio.dataset.statusCol);
-            const statusType = radio.dataset.statusType;
-            const colIndex = parseInt(radio.dataset.colIndex);
-
-            // Get all radio buttons in this group
-            const radioGroup = document.querySelectorAll(`input[name="status_${colIndex}"]`);
-            const labels = Array.from(radioGroup).map(r => document.querySelector(`label[for="${r.id}"]`));
-
-            // Set loading state for all labels in the group
-            labels.forEach(label => {
-                if (label) setRadioLoading(label, true);
-            });
-
-            // Disable all radio buttons in the group
-            radioGroup.forEach(r => r.disabled = true);
-
-            let statusValue = '';
-            if (statusType === 'sesuai') {
-                statusValue = 'Sesuai';
-            } else if (statusType === 'tidak_sesuai') {
-                statusValue = 'Tidak Sesuai';
-            }
-            // For 'kosong', statusValue remains empty string
-
-            // Prepare updates including Keterangan status
-            const updates = { [statusColIndex]: statusValue };
-
-            // Check and update Keterangan status
-            const keteranganStatus = checkFileVerificationStatusAfterUpdate(statusColIndex, statusValue);
-            const keteranganColIndex = 31;
-            updates[keteranganColIndex] = keteranganStatus;
-
-            // Update to Google Sheets
-            google.script.run
-                .withSuccessHandler(() => {
-                    // Remove loading state and enable radio buttons
-                    labels.forEach(label => {
-                        if (label) setRadioLoading(label, false);
-                    });
-                    radioGroup.forEach(r => r.disabled = false);
-
-                    // Update local data table
-                    if (dataTable) {
-                        dataTable.setValue(currentRowDataIndex, statusColIndex, statusValue);
-                        dataTable.setValue(currentRowDataIndex, keteranganColIndex, keteranganStatus);
-                    }
-
-                    const label = headerMap[statusColIndex] || `Status Kolom ${statusColIndex + 1}`;
-                    const displayStatus = statusValue || 'Belum Ditentukan';
-                    showNotification(`${label} berhasil diperbarui menjadi "${displayStatus}". Status Keterangan: ${keteranganStatus}`, 'success');
-
-                    // Get updated Keterangan data after status update
-                    refreshKeteranganData();
-                })
-                .withFailureHandler((error) => {
-                    console.error(error);
-
-                    // Remove loading state and enable radio buttons
-                    labels.forEach(label => {
-                        if (label) setRadioLoading(label, false);
-                    });
-                    radioGroup.forEach(r => r.disabled = false);
-
-                    // Reset to previous state
-                    const currentStatus = dataTable ? dataTable.getFormattedValue(currentRowDataIndex, statusColIndex) || '' : '';
-                    const isSesuai = currentStatus.toLowerCase().includes('sesuai') && !currentStatus.toLowerCase().includes('tidak');
-                    const isTidakSesuai = currentStatus.toLowerCase().includes('tidak sesuai');
-
-                    // Reset radio buttons
-                    document.getElementById(`sesuai_${colIndex}`).checked = isSesuai;
-                    document.getElementById(`tidak_sesuai_${colIndex}`).checked = isTidakSesuai;
-                    document.getElementById(`kosong_${colIndex}`).checked = !isSesuai && !isTidakSesuai;
-
-                    showNotification('Gagal memperbarui status file.', 'error');
-                })
-                .updateRowFields(currentRowIndex, updates);
-        }
-
         // New function to refresh Keterangan data
         function refreshKeteranganData() {
             if (currentRowIndex === null || !google || !google.script || !google.script.run) {
@@ -2949,51 +2639,6 @@
                     }
                 }
             });
-        }
-
-        function checkFileVerificationStatusAfterUpdate(updatedStatusCol, updatedStatusValue) {
-            // Define file columns that need verification
-            const fileColumns = [17, 19, 21, 23, 25, 27, 29]; // File columns
-            const statusColumns = [18, 20, 22, 24, 26, 28, 30]; // Their corresponding status columns
-
-            let allSesuai = true;
-            let hasFiles = false;
-
-            for (let i = 0; i < fileColumns.length; i++) {
-                const fileColIndex = fileColumns[i];
-                const statusColIndex = statusColumns[i];
-
-                // Check if there's a file URL in this column
-                const fileValue = dataTable.getValue(currentRowDataIndex, fileColIndex) || '';
-                if (fileValue.toString().trim() && fileValue.toString().includes('drive.google.com')) {
-                    hasFiles = true;
-
-                    // Get the status value (use updated value if this is the column being updated)
-                    let statusValue;
-                    if (statusColIndex === updatedStatusCol) {
-                        statusValue = updatedStatusValue;
-                    } else {
-                        statusValue = dataTable.getValue(currentRowDataIndex, statusColIndex) || '';
-                    }
-
-                    const isSesuai = statusValue.toString().toLowerCase().includes('sesuai') &&
-                        !statusValue.toString().toLowerCase().includes('tidak');
-
-                    if (!isSesuai) {
-                        allSesuai = false;
-                        break;
-                    }
-                }
-            }
-
-            // Return status based on verification results
-            if (!hasFiles) {
-                return 'BELUM LENGKAP'; // No files uploaded
-            } else if (allSesuai) {
-                return 'LENGKAP'; // All files verified as "Sesuai"
-            } else {
-                return 'BELUM LENGKAP'; // Some files not verified or "Tidak Sesuai"
-            }
         }
 
         function resetDisplay() {
