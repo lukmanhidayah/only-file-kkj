@@ -230,166 +230,6 @@
             box-sizing: border-box;
         }
 
-        /* Preview Modal */
-        .preview-overlay {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.4);
-            z-index: 1200;
-        }
-
-        .preview-modal {
-            display: none;
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #fff;
-            width: 480px;
-            max-width: 90vw;
-            max-height: 85vh;
-            border-radius: 12px;
-            box-shadow: 0 15px 50px rgba(0, 0, 0, 0.3);
-            z-index: 1201;
-            overflow: hidden;
-        }
-
-        .preview-modal__header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 16px 20px;
-            border-bottom: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
-
-        .preview-modal__title {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-            color: #111827;
-        }
-
-        .preview-modal__close {
-            border: none;
-            background: transparent;
-            font-size: 1.3rem;
-            cursor: pointer;
-            color: #6b7280;
-            padding: 4px;
-            border-radius: 4px;
-        }
-
-        .preview-modal__close:hover {
-            background: #e5e7eb;
-            color: #374151;
-        }
-
-        .preview-modal__body {
-            padding: 20px;
-            max-height: 60vh;
-            overflow-y: auto;
-        }
-
-        .preview-modal__body p {
-            margin: 0 0 16px;
-            color: #4b5563;
-            font-size: 0.95rem;
-        }
-
-        .preview-changes {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .preview-change-item {
-            margin-bottom: 16px;
-            padding: 12px;
-            background: #f9fafb;
-            border-radius: 8px;
-            border-left: 4px solid #3b82f6;
-        }
-
-        .preview-change-item__label {
-            font-weight: 600;
-            color: #111827;
-            margin-bottom: 6px;
-            font-size: 0.9rem;
-        }
-
-        .preview-change-item__values {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.85rem;
-        }
-
-        .preview-change-item__from {
-            color: #dc2626;
-            background: #fef2f2;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #fecaca;
-        }
-
-        .preview-change-item__arrow {
-            color: #6b7280;
-            font-weight: bold;
-        }
-
-        .preview-change-item__to {
-            color: #059669;
-            background: #f0fdf4;
-            padding: 4px 8px;
-            border-radius: 4px;
-            border: 1px solid #bbf7d0;
-        }
-
-        .preview-modal__footer {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            padding: 16px 20px;
-            border-top: 1px solid #e5e7eb;
-            background: #f9fafb;
-        }
-
-        .preview-modal__action {
-            border: none;
-            border-radius: 6px;
-            padding: 8px 16px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 500;
-        }
-
-        .preview-modal__action--cancel {
-            background: #6b7280;
-            color: #fff;
-        }
-
-        .preview-modal__action--cancel:hover {
-            background: #4b5563;
-        }
-
-        .preview-modal__action--confirm {
-            background: #2563eb;
-            color: #fff;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .preview-modal__action--confirm:hover {
-            background: #1d4ed8;
-        }
-
-        .preview-modal__action--confirm:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-        }
-
         /* Notification styles */
         .notification {
             position: fixed;
@@ -1337,26 +1177,6 @@
             </div>
         </div>
 
-        <!-- Preview Modal -->
-        <div class="preview-overlay" id="previewOverlay"></div>
-        <div class="preview-modal" id="previewModal" role="dialog" aria-modal="true" aria-labelledby="previewModalTitle"
-            aria-hidden="true">
-            <div class="preview-modal__header">
-                <h3 class="preview-modal__title" id="previewModalTitle">Pratinjau Perubahan</h3>
-                <button type="button" class="preview-modal__close" onclick="closePreviewModal()"
-                    aria-label="Tutup pratinjau">&times;</button>
-            </div>
-            <div class="preview-modal__body">
-                <p>Anda akan mengubah bidang berikut:</p>
-                <ul class="preview-changes" id="previewChangesList"></ul>
-            </div>
-            <div class="preview-modal__footer">
-                <button type="button" class="preview-modal__action preview-modal__action--cancel"
-                    onclick="closePreviewModal()">Batal</button>
-                <button type="button" class="preview-modal__action preview-modal__action--confirm" id="confirmSaveBtn"
-                    onclick="confirmSaveEdits()">Simpan Perubahan</button>
-            </div>
-        </div>
 
 
         <div class="prefill-modal-overlay" id="prefillModalOverlay"></div>
@@ -1558,9 +1378,7 @@
             let dataTable;
             let currentRowIndex = null;
             let currentRowDataIndex = null;
-            let isSaving = false;
             let isPrefilling = false;
-            let pendingChanges = null;
 
             function init() {
                 const query = new google.visualization.Query(
@@ -1568,7 +1386,6 @@
                 );
                 query.send(handleQueryResponse);
                 setupDrag();
-                setupPreviewModal();
                 setupPrefillModal();
                 initUpload();
             }
@@ -1612,7 +1429,6 @@
 
                 currentRowIndex = null;
                 currentRowDataIndex = null;
-                resetSaveState();
                 resetPrefillUI();
 
                 if (!nip || !dataTable) return;
@@ -1717,15 +1533,11 @@
 
                         htmlParts.push(`
                     <div class="actions">
-                        <button class="primary" id="saveChangesBtn" onclick="saveEdits()">
-                            <span id="saveButtonText">Simpan Perubahan</span>
-                        </button>
                         <span class="status-message" id="prefillStatus"></span>
                     </div>
                     <div class="prefill-link" id="prefillLinkContainer"></div>`);
 
                         resultDiv.innerHTML = htmlParts.join('');
-                        resetSaveState();
                         resetPrefillUI();
                         break;
                     }
@@ -1736,58 +1548,6 @@
                     resetPrefillUI();
                 }
             }
-
-            function setSavingState(state) {
-                isSaving = state;
-                const button = document.getElementById('saveChangesBtn');
-                const buttonText = document.getElementById('saveButtonText');
-                const confirmBtn = document.getElementById('confirmSaveBtn');
-
-                if (button && buttonText) {
-                    button.disabled = state;
-                    if (state) {
-                        button.classList.add('btn-loading');
-                        buttonText.textContent = 'Menyimpan...';
-                    } else {
-                        button.classList.remove('btn-loading');
-                        buttonText.textContent = 'Simpan Perubahan';
-                    }
-                }
-
-                if (confirmBtn) {
-                    confirmBtn.disabled = state;
-                    if (state) {
-                        confirmBtn.classList.add('btn-loading');
-                        confirmBtn.innerHTML = '<span>Menyimpan...</span>';
-                    } else {
-                        confirmBtn.classList.remove('btn-loading');
-                        confirmBtn.innerHTML = 'Simpan Perubahan';
-                    }
-                }
-            }
-            function resetSaveState() {
-                isSaving = false;
-                const button = document.getElementById('saveChangesBtn');
-                const buttonText = document.getElementById('saveButtonText');
-                const confirmBtn = document.getElementById('confirmSaveBtn');
-
-                if (button && buttonText) {
-                    button.disabled = false;
-                    button.classList.remove('btn-loading');
-                    buttonText.textContent = 'Simpan Perubahan';
-                }
-
-                if (confirmBtn) {
-                    confirmBtn.disabled = false;
-                    confirmBtn.classList.remove('btn-loading');
-                    confirmBtn.innerHTML = 'Simpan Perubahan';
-                }
-
-                pendingChanges = null;
-                resetPrefillUI();
-                closePrefillModal();
-            }
-
 
             function renderPrefillOptions() {
                 const container = document.getElementById('prefillOptionsContainer');
@@ -2275,72 +2035,6 @@
                 }, 5000);
             }
 
-            function showSuccessNotification(changes) {
-                // Filter out Keterangan changes from notifications
-                const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
-
-                const message = filteredChanges.length === 1 ?
-                    'Perubahan berhasil disimpan.' :
-                    filteredChanges.length > 1 ?
-                        `${filteredChanges.length} perubahan berhasil disimpan.` :
-                        'Data berhasil disimpan.';
-                showNotification(message, 'success', filteredChanges);
-            }
-
-            function openPreviewModal(changes) {
-                if (!Array.isArray(changes)) return;
-
-                // Filter out Keterangan changes from preview modal
-                const filteredChanges = changes.filter(change => change.label !== 'Keterangan');
-
-                const overlay = document.getElementById('previewOverlay');
-                const modal = document.getElementById('previewModal');
-                const list = document.getElementById('previewChangesList');
-                const confirmBtn = document.getElementById('confirmSaveBtn');
-
-                if (!overlay || !modal || !list || !confirmBtn) return;
-
-                // Reset confirm button state
-                confirmBtn.disabled = false;
-                confirmBtn.classList.remove('btn-loading');
-
-                list.innerHTML = '';
-                filteredChanges.forEach((entry) => {
-                    const item = document.createElement('li');
-                    item.className = 'preview-change-item';
-                    item.innerHTML = `
-                    <div class="preview-change-item__label">${escapeHtml(entry.label)}</div>
-                    <div class="preview-change-item__values">
-                        <span class="preview-change-item__from">${escapeHtml(entry.from)}</span>
-                        <span class="preview-change-item__arrow">&rarr;</span>
-                        <span class="preview-change-item__to">${escapeHtml(entry.to)}</span>
-                    </div>
-                `;
-                    list.appendChild(item);
-                });
-
-                overlay.style.display = 'block';
-                modal.style.display = 'block';
-                modal.setAttribute('aria-hidden', 'false');
-            }
-
-            function closePreviewModal() {
-                const overlay = document.getElementById('previewOverlay');
-                const modal = document.getElementById('previewModal');
-                if (!overlay || !modal) return;
-
-                overlay.style.display = 'none';
-                modal.style.display = 'none';
-                modal.setAttribute('aria-hidden', 'true');
-            }
-
-            function setupPreviewModal() {
-                const overlay = document.getElementById('previewOverlay');
-                if (overlay) {
-                    overlay.addEventListener('click', closePreviewModal);
-                }
-            }
-
             function escapeHtml(value) {
                 return String(value ?? '')
                     .replace(/&/g, '&amp;')
@@ -2432,192 +2126,6 @@
                     .updateKeterangan(rowIndex, statusText);
             }
 
-            function saveEdits() {
-                if (isSaving) return;
-                if (currentRowIndex === null || currentRowDataIndex === null) {
-                    showNotification('Tidak ada data yang dipilih.', 'error');
-                    return;
-                }
-
-                if (!google || !google.script || !google.script.run) {
-                    showNotification('Fitur simpan hanya tersedia saat dijalankan dari Google Apps Script.', 'error');
-                    return;
-                }
-
-                const inputs = document.querySelectorAll('.edit-input[data-col-index]');
-                const updates = {};
-                const changeSummaries = [];
-
-                inputs.forEach((input) => {
-                    const colIndex = Number(input.getAttribute('data-col-index'));
-                    if (Number.isNaN(colIndex) || !EDITABLE_COLUMNS.has(colIndex)) return;
-
-                    const rawInputValue = input.value ?? '';
-                    let newValue = rawInputValue.trim();
-
-                    // Get original value from data table
-                    const originalRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
-                    let originalValue = '';
-
-                    if (originalRawValue instanceof Date) {
-                        const year = originalRawValue.getFullYear();
-                        const month = String(originalRawValue.getMonth() + 1).padStart(2, '0');
-                        const day = String(originalRawValue.getDate()).padStart(2, '0');
-                        originalValue = `${year}-${month}-${day}`;
-                        // Add single quote prefix for date columns that require it
-                        if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
-                            originalValue = "'" + originalValue;
-                        }
-                    } else {
-                        originalValue = String(originalRawValue || '').trim();
-                        // No need to add prefix here since we'll check the raw value as-is
-                    }
-
-                    // For single quote prefix columns, ensure we add the prefix in the new value
-                    if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex)) {
-                        // Add prefix to the new value if it has content
-                        if (newValue) {
-                            newValue = "'" + newValue;
-                        }
-                    }
-
-                    // Compare values (remove prefix for comparison)
-                    const normalizedOriginal = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && originalValue.startsWith("'")
-                        ? originalValue.substring(1)
-                        : originalValue;
-                    const normalizedNew = SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")
-                        ? newValue.substring(1)
-                        : newValue;
-
-                    if (normalizedOriginal !== normalizedNew) {
-                        const label = headerMap[colIndex] || dataTable.getColumnLabel(colIndex) || `Kolom ${colIndex + 1}`;
-
-                        // Convert date input back to proper format if needed
-                        let processedValue = newValue;
-                        if (/^\d{4}-\d{2}-\d{2}$/.test(newValue.replace(/^'/, ''))) {
-                            // For date fields with prefix, keep the prefix
-                            if (SINGLE_QUOTE_PREFIX_COLUMNS.has(colIndex) && newValue.startsWith("'")) {
-                                processedValue = newValue; // Keep prefix + date
-                            } else {
-                                processedValue = newValue; // Regular date
-                            }
-                        }
-
-                        updates[colIndex] = processedValue;
-                        changeSummaries.push({
-                            label,
-                            from: formatChangeDisplay(originalRawValue),
-                            to: formatChangeDisplay(processedValue)
-                        });
-                    }
-                });
-
-                // Ensure all single quote prefix columns have proper prefix, even if not edited
-                SINGLE_QUOTE_PREFIX_COLUMNS.forEach(colIndex => {
-                    // Skip if this column was already processed above
-                    if (updates.hasOwnProperty(colIndex)) return;
-
-                    // Get current value from data table
-                    const currentRawValue = dataTable.getValue(currentRowDataIndex, colIndex);
-                    let currentValue = '';
-
-                    if (currentRawValue instanceof Date) {
-                        const year = currentRawValue.getFullYear();
-                        const month = String(currentRawValue.getMonth() + 1).padStart(2, '0');
-                        const day = String(currentRawValue.getDate()).padStart(2, '0');
-                        currentValue = `${year}-${month}-${day}`;
-                    } else {
-                        currentValue = String(currentRawValue || '').trim();
-                    }
-
-                    // Check if prefix is needed
-                    if (currentValue && !currentValue.startsWith("'")) {
-                        const newValue = "'" + currentValue;
-                        updates[colIndex] = newValue;
-                        // Note: We don't add this to changeSummaries to keep the preview clean
-                    }
-                });
-
-                // Allow saving even if no changes
-                if (!Object.keys(updates).length) {
-                    // Still proceed with save to trigger any server-side logic
-                    pendingChanges = { updates: {}, changeSummaries: [] };
-                    openPreviewModal([{
-                        label: 'Status',
-                        from: 'Tidak ada perubahan',
-                        to: 'Data akan disinkronisasi'
-                    }]);
-                    return;
-                }
-
-                pendingChanges = { updates, changeSummaries };
-                openPreviewModal(changeSummaries);
-            }
-
-            function confirmSaveEdits() {
-                if (!pendingChanges || isSaving) return;
-
-                const { updates, changeSummaries } = pendingChanges;
-
-                // Close preview modal and start loading state
-                closePreviewModal();
-                setSavingState(true);
-
-                console.log('Saving updates:', updates);
-                console.log('Row index:', currentRowIndex);
-
-                // If no actual updates, just show success and return
-                if (Object.keys(updates).length === 0) {
-                    setTimeout(() => {
-                        setSavingState(false);
-                        pendingChanges = null;
-                        showNotification('Data berhasil disinkronisasi.', 'success');
-                        // Get updated Keterangan data after sync
-                        refreshKeteranganData();
-                        resetPrefillUI();
-                        openPrefillModal();
-                    }, 1000);
-                    return;
-                }
-
-                google.script.run
-                    .withSuccessHandler((response) => {
-                        console.log('Save success:', response);
-
-                        // Update local data table with new values
-                        Object.entries(updates).forEach(([colIndexStr, value]) => {
-                            const colIndex = Number(colIndexStr);
-                            if (!Number.isNaN(colIndex) && dataTable) {
-                                // Convert date string back to Date object if needed
-                                let processedValue = value;
-                                if (/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-                                    const parts = value.split('-').map(Number);
-                                    processedValue = new Date(parts[0], parts[1] - 1, parts[2]);
-                                }
-                                dataTable.setValue(currentRowDataIndex, colIndex, processedValue);
-                            }
-                        });
-
-                        setSavingState(false);
-                        pendingChanges = null;
-
-                        // Show success notification
-                        showSuccessNotification(changeSummaries);
-
-                        // Get updated Keterangan data after successful save
-                        refreshKeteranganData();
-                        resetPrefillUI();
-                        openPrefillModal();
-                    })
-                    .withFailureHandler((error) => {
-                        console.error('Save error:', error);
-                        setSavingState(false);
-                        pendingChanges = null;
-                        showNotification('Gagal menyimpan perubahan: ' + (error.message || error.toString()), 'error');
-                    })
-                    .updateRowFields(currentRowIndex, updates);
-            }
-
             // New function to refresh Keterangan data
             function refreshKeteranganData() {
                 if (currentRowIndex === null || !google || !google.script || !google.script.run) {
@@ -2677,7 +2185,6 @@
                 document.getElementById('result').innerHTML = '';
                 currentRowIndex = null;
                 currentRowDataIndex = null;
-                resetSaveState();
                 resetPrefillUI();
                 closePrefillModal();
             }
@@ -2761,7 +2268,6 @@
                 document.addEventListener('keydown', (e) => {
                     if (e.key === 'Escape') {
                         closePopup();
-                        closePreviewModal();
                         closePrefillModal();
                         closeUploadModal();
                     }
