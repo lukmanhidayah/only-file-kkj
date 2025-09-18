@@ -1690,7 +1690,10 @@
 
             for (let i = 0; i < dataTable.getNumberOfRows(); i++) {
                 const nipValue = (dataTable.getFormattedValue(i, nipColIndex) || '').trim();
-                if (nipValue === nip) {
+
+                const normalizedNipValue = nipValue.startsWith("'") ? nipValue.substring(1) : nipValue;
+                const normalizedNip = nip.startsWith("'") ? nip.substring(1) : nip;
+                if (normalizedNipValue === normalizedNip) {
                     found = true;
                     const rowIndexInSheet = i + 2;
                     currentRowIndex = rowIndexInSheet;
