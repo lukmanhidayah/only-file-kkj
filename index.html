@@ -541,6 +541,10 @@
             z-index: 1300;
         }
 
+        .upload-modal-overlay.is-locked {
+            cursor: wait;
+        }
+
         .upload-modal {
             display: none;
             position: fixed;
@@ -585,6 +589,11 @@
         .upload-modal__close:hover {
             background: #e5e7eb;
             color: #374151;
+        }
+
+        .upload-modal__close[disabled] {
+            opacity: 0.4;
+            cursor: not-allowed;
         }
 
         .upload-modal__body {
@@ -677,6 +686,12 @@
 
         .upload-modal__action--cancel:hover {
             background: #4b5563;
+        }
+
+        .upload-modal__action--cancel:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.7;
         }
 
         .upload-modal__action--save {
@@ -2353,6 +2368,29 @@
             let currentUploadFolderId = null;
             let selectedFile = null;
 
+            let isUploadInProgress = false;
+
+            function setUploadInProgress(state) {
+                isUploadInProgress = state;
+
+                const closeButton = document.querySelector('.upload-modal__close');
+                if (closeButton) {
+                    closeButton.disabled = state;
+                    closeButton.setAttribute('aria-disabled', state ? 'true' : 'false');
+                }
+
+                const cancelButton = document.querySelector('.upload-modal__action--cancel');
+                if (cancelButton) {
+                    cancelButton.disabled = state;
+                    cancelButton.setAttribute('aria-disabled', state ? 'true' : 'false');
+                }
+
+                const overlay = document.getElementById('uploadModalOverlay');
+                if (overlay) {
+                    overlay.classList.toggle('is-locked', state);
+                }
+            }
+
             function openUploadModal(columnIndex, uploadFolderUrl) {
                 currentUploadColumnIndex = columnIndex;
                 // Extract folder ID from URL
@@ -2379,10 +2417,17 @@
             }
 
             function closeUploadModal() {
+                if (isUploadInProgress) {
+                    showNotification('Proses upload masih berlangsung. Tunggu sampai selesai sebelum menutup modal.', 'warning');
+                    return;
+                }
+
                 const modal = document.getElementById('uploadModal');
                 const overlay = document.getElementById('uploadModalOverlay');
 
                 if (!modal || !overlay) return;
+
+                setUploadInProgress(false);
 
                 overlay.style.display = 'none';
                 modal.style.display = 'none';
@@ -2396,6 +2441,8 @@
             }
 
             function resetUploadForm() {
+                setUploadInProgress(false);
+
                 const fileInput = document.getElementById('fileInput');
                 const fileInfo = document.getElementById('fileInfo');
                 const uploadStep1 = document.getElementById('uploadStep1');
@@ -2621,6 +2668,11 @@
 
 
             function uploadFile() {
+                if (isUploadInProgress) {
+                    showNotification('Proses upload masih berjalan. Tunggu sampai selesai sebelum memulai ulang.', 'warning');
+                    return;
+                }
+
                 if (!selectedFile || !currentUploadFolderId || currentUploadColumnIndex === null) {
                     showNotification('Pilih file terlebih dahulu.', 'error');
                     return;
@@ -2636,6 +2688,8 @@
                     uploadButton.disabled = true;
                     uploadButton.innerHTML = '<span>Mengupload...</span>';
                 }
+
+                setUploadInProgress(true);
 
                 resetUploadStatus();
                 setUploadStatus('upload', 'active');
@@ -2662,6 +2716,7 @@
                             console.error('Upload error:', error);
                             setUploadStatus('upload', 'error');
                             stopUploadProgress('Upload gagal');
+                        setUploadInProgress(false);
                             if (uploadButton) {
                                 uploadButton.disabled = false;
                                 uploadButton.innerHTML = `
@@ -2679,6 +2734,7 @@
                 reader.onerror = function () {
                     setUploadStatus('upload', 'error');
                     stopUploadProgress('Gagal membaca file');
+                    setUploadInProgress(false);
                     if (uploadButton) {
                         uploadButton.disabled = false;
                         uploadButton.innerHTML = `
@@ -2722,6 +2778,7 @@
                     console.error('No URL found in result:', result);
                     setUploadStatus('updateSheet', 'error');
                     stopUploadProgress('URL file tidak ditemukan');
+                    setUploadInProgress(false);
                     const uploadButton = document.getElementById('uploadButton');
                     if (uploadButton) {
                         uploadButton.disabled = false;
@@ -2769,6 +2826,7 @@
                     setUploadStatus('updateSheet', 'error');
                     stopUploadProgress('Data tidak valid untuk update');
                     showNotification('Data tidak valid untuk update.', 'error');
+                    setUploadInProgress(false);
                     const uploadButton = document.getElementById('uploadButton');
                     if (uploadButton) {
                         uploadButton.disabled = false;
@@ -2790,6 +2848,7 @@
                     setUploadStatus('updateSheet', 'error');
                     stopUploadProgress('Google Apps Script tidak tersedia');
                     showNotification('Google Apps Script tidak tersedia. URL: ' + fileUrl, 'error');
+                    setUploadInProgress(false);
                     const uploadButton = document.getElementById('uploadButton');
                     if (uploadButton) {
                         uploadButton.disabled = false;
@@ -2820,6 +2879,7 @@
 
                         setUploadStatus('updateUi', 'completed');
                         completeUploadProgress('Nama file berhasil diperbarui.');
+                        setUploadInProgress(false);
                         showUploadCompletion(fileName || (selectedFile ? selectedFile.name : 'File terbaru'), fileUrl);
 
                         const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
@@ -2833,6 +2893,7 @@
                         console.error('Spreadsheet update error:', error);
                         setUploadStatus('updateSheet', 'error');
                         stopUploadProgress('Gagal memperbarui data spreadsheet');
+                        setUploadInProgress(false);
                         const uploadButton = document.getElementById('uploadButton');
                         if (uploadButton) {
                             uploadButton.disabled = false;
@@ -2849,6 +2910,8 @@
             }
 
             function finalizeUpload() {
+                setUploadInProgress(false);
+
                 // Show final notification that file is ready to view
                 if (currentUploadColumnIndex !== null) {
                     const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
