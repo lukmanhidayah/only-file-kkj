@@ -773,6 +773,49 @@
             font-weight: 500;
         }
 
+        .upload-status {
+            margin-top: 16px;
+            padding: 12px 16px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+        }
+
+        .upload-status__item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            font-size: 0.85rem;
+            color: #475569;
+        }
+
+        .upload-status__item + .upload-status__item {
+            margin-top: 8px;
+        }
+
+        .upload-status__label {
+            flex: 1;
+        }
+
+        .upload-status__state {
+            font-weight: 600;
+            min-width: 120px;
+            text-align: right;
+        }
+
+        .upload-status__item.is-active .upload-status__state {
+            color: #2563eb;
+        }
+
+        .upload-status__item.is-completed .upload-status__state {
+            color: #16a34a;
+        }
+
+        .upload-status__item.is-error .upload-status__state {
+            color: #dc2626;
+        }
+
         .upload-result {
             padding: 16px;
             background: #f0fdf4;
@@ -1259,6 +1302,20 @@
                             <div class="upload-progress__fill" id="uploadProgressFill"></div>
                         </div>
                         <div class="upload-progress__text" id="uploadProgressText">Mengupload...</div>
+                    </div>
+                    <div class="upload-status" id="uploadStatus" style="display: none;">
+                        <div class="upload-status__item" data-step="upload">
+                            <span class="upload-status__label">Mengunggah file ke Google Drive</span>
+                            <span class="upload-status__state" aria-live="polite">Menunggu</span>
+                        </div>
+                        <div class="upload-status__item" data-step="updateSheet">
+                            <span class="upload-status__label">Memperbarui data spreadsheet</span>
+                            <span class="upload-status__state" aria-live="polite">Menunggu</span>
+                        </div>
+                        <div class="upload-status__item" data-step="updateUi">
+                            <span class="upload-status__label">Memperbarui tampilan nama file</span>
+                            <span class="upload-status__state" aria-live="polite">Menunggu</span>
+                        </div>
                     </div>
                 </div>
 
@@ -2345,10 +2402,8 @@
                 const uploadStep2 = document.getElementById('uploadStep2');
                 const uploadStep3 = document.getElementById('uploadStep3');
                 const saveBtn = document.getElementById('saveUploadBtn');
-                const uploadProgress = document.getElementById('uploadProgress');
                 const uploadButton = document.getElementById('uploadButton');
-                const uploadProgressFill = document.getElementById('uploadProgressFill');
-                const uploadProgressText = document.getElementById('uploadProgressText');
+                const statusContainer = document.getElementById('uploadStatus');
 
                 if (fileInput) fileInput.value = '';
                 if (fileInfo) fileInfo.style.display = 'none';
@@ -2362,9 +2417,11 @@
                     uploadStep3.classList.remove('completed');
                 }
                 if (saveBtn) saveBtn.style.display = 'none';
-                if (uploadProgress) uploadProgress.style.display = 'none';
 
-                // Reset upload button to initial state
+                stopUploadProgress();
+                resetUploadStatus();
+                if (statusContainer) statusContainer.style.display = 'none';
+
                 if (uploadButton) {
                     uploadButton.disabled = false;
                     uploadButton.innerHTML = `
@@ -2374,10 +2431,6 @@
                     Upload File
                 `;
                 }
-
-                // Reset progress bar and text
-                if (uploadProgressFill) uploadProgressFill.style.width = '0%';
-                if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
 
                 selectedFile = null;
             }
@@ -2418,6 +2471,155 @@
                 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
             }
 
+            let uploadProgressInterval = null;
+            let uploadProgressValue = 0;
+            let uploadProgressTarget = 0;
+            const uploadStatusSteps = ['upload', 'updateSheet', 'updateUi'];
+
+            function getUploadStatusItem(stepId) {
+                return document.querySelector(`.upload-status__item[data-step="${stepId}"]`);
+            }
+
+            function setUploadStatus(stepId, state, customLabel) {
+                const item = getUploadStatusItem(stepId);
+                if (!item) return;
+
+                const labelEl = item.querySelector('.upload-status__label');
+                if (labelEl && customLabel) {
+                    labelEl.textContent = customLabel;
+                }
+
+                const stateEl = item.querySelector('.upload-status__state');
+                if (!stateEl) return;
+
+                let text = 'Menunggu';
+                if (state === 'active') {
+                    text = 'Sedang berjalan';
+                } else if (state === 'completed') {
+                    text = 'Selesai';
+                } else if (state === 'error') {
+                    text = 'Gagal';
+                }
+
+                stateEl.textContent = text;
+
+                item.classList.remove('is-active', 'is-completed', 'is-error');
+                if (state === 'active') {
+                    item.classList.add('is-active');
+                } else if (state === 'completed') {
+                    item.classList.add('is-completed');
+                } else if (state === 'error') {
+                    item.classList.add('is-error');
+                }
+            }
+
+            function resetUploadStatus() {
+                uploadStatusSteps.forEach((stepId) => {
+                    setUploadStatus(stepId, 'pending');
+                });
+            }
+
+            function setUploadProgressText(text) {
+                const textEl = document.getElementById('uploadProgressText');
+                if (textEl && typeof text === 'string') {
+                    textEl.textContent = text;
+                }
+            }
+
+            function updateUploadProgressUI(value, text) {
+                if (typeof value === 'number') {
+                    const fill = document.getElementById('uploadProgressFill');
+                    if (fill) {
+                        const boundedValue = Math.max(0, Math.min(100, value));
+                        fill.style.width = boundedValue + '%';
+                    }
+                }
+                if (typeof text === 'string') {
+                    setUploadProgressText(text);
+                }
+            }
+
+            function startUploadProgress(initialText) {
+                const progressContainer = document.getElementById('uploadProgress');
+                if (progressContainer) {
+                    progressContainer.style.display = 'block';
+                }
+
+                const statusContainer = document.getElementById('uploadStatus');
+                if (statusContainer) {
+                    statusContainer.style.display = 'block';
+                }
+
+                if (uploadProgressInterval) {
+                    clearInterval(uploadProgressInterval);
+                }
+
+                uploadProgressValue = 0;
+                uploadProgressTarget = 60;
+
+                const baseText = initialText || 'Mengunggah file ke Google Drive...';
+                updateUploadProgressUI(uploadProgressValue, baseText + ' 0%');
+
+                uploadProgressInterval = setInterval(() => {
+                    if (uploadProgressValue < uploadProgressTarget) {
+                        uploadProgressValue += Math.random() * 6 + 2;
+                        if (uploadProgressValue > uploadProgressTarget) {
+                            uploadProgressValue = uploadProgressTarget;
+                        }
+                        updateUploadProgressUI(uploadProgressValue);
+
+                        const textEl = document.getElementById('uploadProgressText');
+                        if (textEl && textEl.textContent && textEl.textContent.indexOf(baseText) === 0) {
+                            setUploadProgressText(baseText + ' ' + Math.round(uploadProgressValue) + '%');
+                        }
+                    }
+                }, 250);
+            }
+
+            function setUploadProgressTarget(targetValue) {
+                uploadProgressTarget = Math.max(uploadProgressTarget, Math.min(100, targetValue));
+            }
+
+            function completeUploadProgress(finalText) {
+                if (uploadProgressInterval) {
+                    clearInterval(uploadProgressInterval);
+                    uploadProgressInterval = null;
+                }
+                uploadProgressValue = 100;
+                uploadProgressTarget = 100;
+                updateUploadProgressUI(uploadProgressValue, finalText || 'Selesai');
+            }
+
+            function stopUploadProgress(errorText) {
+                if (uploadProgressInterval) {
+                    clearInterval(uploadProgressInterval);
+                    uploadProgressInterval = null;
+                }
+                uploadProgressValue = 0;
+                uploadProgressTarget = 0;
+
+                const progressContainer = document.getElementById('uploadProgress');
+                if (progressContainer) {
+                    progressContainer.style.display = errorText ? 'block' : 'none';
+                }
+
+                const statusContainer = document.getElementById('uploadStatus');
+                if (statusContainer) {
+                    if (errorText) {
+                        statusContainer.style.display = 'block';
+                    } else {
+                        statusContainer.style.display = 'none';
+                    }
+                }
+
+                if (errorText) {
+                    updateUploadProgressUI(0, errorText);
+                } else {
+                    updateUploadProgressUI(0, 'Mengupload...');
+                }
+            }
+
+
             function uploadFile() {
                 if (!selectedFile || !currentUploadFolderId || currentUploadColumnIndex === null) {
                     showNotification('Pilih file terlebih dahulu.', 'error');
@@ -2430,29 +2632,19 @@
                 }
 
                 const uploadButton = document.getElementById('uploadButton');
-                const uploadProgress = document.getElementById('uploadProgress');
-                const uploadProgressFill = document.getElementById('uploadProgressFill');
-                const uploadProgressText = document.getElementById('uploadProgressText');
+                if (uploadButton) {
+                    uploadButton.disabled = true;
+                    uploadButton.innerHTML = '<span>Mengupload...</span>';
+                }
 
-                // Show loading state
-                uploadButton.disabled = true;
-                uploadButton.innerHTML = '<span>Mengupload...</span>';
-                uploadProgress.style.display = 'block';
+                resetUploadStatus();
+                setUploadStatus('upload', 'active');
+                startUploadProgress('Mengunggah file ke Google Drive...');
 
-                // Simulate progress (since we can't get real progress from Google Apps Script)
-                let progress = 0;
-                const progressInterval = setInterval(() => {
-                    progress += Math.random() * 15;
-                    if (progress > 90) progress = 90;
-                    uploadProgressFill.style.width = progress + '%';
-                    uploadProgressText.textContent = `Mengupload... ${Math.round(progress)}%`;
-                }, 200);
-
-                // Convert file to base64 for transfer
                 const reader = new FileReader();
                 reader.onload = function (e) {
                     const fileData = {
-                        content: e.target.result.split(',')[1], // Remove data:mime;base64, prefix
+                        content: e.target.result.split(',')[1],
                         name: selectedFile.name,
                         mimeType: selectedFile.type,
                         folderId: currentUploadFolderId
@@ -2460,151 +2652,197 @@
 
                     google.script.run
                         .withSuccessHandler((result) => {
-                            clearInterval(progressInterval);
-                            uploadProgressFill.style.width = '100%';
-                            uploadProgressText.textContent = 'Upload berhasil!';
-
-                            setTimeout(() => {
-                                handleUploadSuccess(result);
-                            }, 500);
+                            setUploadStatus('upload', 'completed');
+                            setUploadStatus('updateSheet', 'active');
+                            setUploadProgressTarget(85);
+                            setUploadProgressText('Upload selesai. Memperbarui data spreadsheet...');
+                            handleUploadSuccess(result);
                         })
                         .withFailureHandler((error) => {
-                            clearInterval(progressInterval);
                             console.error('Upload error:', error);
-
-                            // Reset upload button
-                            uploadButton.disabled = false;
-                            uploadButton.innerHTML = `
+                            setUploadStatus('upload', 'error');
+                            stopUploadProgress('Upload gagal');
+                            if (uploadButton) {
+                                uploadButton.disabled = false;
+                                uploadButton.innerHTML = `
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
                                 <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
                             </svg>
                             Upload File
                         `;
-                            uploadProgress.style.display = 'none';
-
-                            // Reset progress bar and text
-                            uploadProgressFill.style.width = '0%';
-                            uploadProgressText.textContent = 'Mengupload...';
-
+                            }
                             showNotification('Gagal mengupload file: ' + (error.message || error), 'error');
                         })
                         .uploadFileToDrive(fileData);
+                };
+
+                reader.onerror = function () {
+                    setUploadStatus('upload', 'error');
+                    stopUploadProgress('Gagal membaca file');
+                    if (uploadButton) {
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                `;
+                    }
+                    showNotification('Gagal membaca file dari perangkat.', 'error');
                 };
 
                 reader.readAsDataURL(selectedFile);
             }
 
             function handleUploadSuccess(result) {
-                console.log('Upload result:', result); // Debug log
+                console.log('Upload result:', result);
 
                 let fileUrl = null;
                 let fileName = selectedFile ? selectedFile.name : 'Unknown file';
 
-                // Handle different response formats
                 if (typeof result === 'string') {
-                    // If result is just a URL string
                     fileUrl = result;
                 } else if (result && typeof result === 'object') {
-                    // If result is an object, try to extract URL
-                    fileUrl = result.url || result.fileUrl || result.getUrl || null;
-                    if (result.fileName) fileName = result.fileName;
+                    fileUrl = result.url || result.fileUrl || result.getUrl || result.webViewLink || result.webContentLink || null;
+                    if (typeof result.getUrl === 'function') {
+                        try {
+                            fileUrl = fileUrl || result.getUrl();
+                        } catch (err) {
+                            console.warn('Could not extract URL from result.getUrl()', err);
+                        }
+                    }
+                    if (result.fileName) {
+                        fileName = result.fileName;
+                    }
                 }
 
-                console.log('Extracted file URL:', fileUrl); // Debug log
+                console.log('Extracted file URL:', fileUrl);
 
                 if (!fileUrl || fileUrl === '') {
                     console.error('No URL found in result:', result);
-                    showNotification('Upload berhasil tapi URL tidak ditemukan. Coba refresh halaman.', 'error');
-
-                    // Reset upload button untuk retry
+                    setUploadStatus('updateSheet', 'error');
+                    stopUploadProgress('URL file tidak ditemukan');
                     const uploadButton = document.getElementById('uploadButton');
                     if (uploadButton) {
                         uploadButton.disabled = false;
                         uploadButton.innerHTML = `
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                            <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
-                        </svg>
-                        Upload File
-                    `;
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                `;
                     }
-
-                    const uploadProgress = document.getElementById('uploadProgress');
-                    if (uploadProgress) uploadProgress.style.display = 'none';
-
-                    // Reset progress bar and text
-                    const uploadProgressFill = document.getElementById('uploadProgressFill');
-                    const uploadProgressText = document.getElementById('uploadProgressText');
-                    if (uploadProgressFill) uploadProgressFill.style.width = '0%';
-                    if (uploadProgressText) uploadProgressText.textContent = 'Mengupload...';
-
+                    showNotification('Upload berhasil tapi URL tidak ditemukan. Coba refresh halaman.', 'error');
                     return;
                 }
 
+                setUploadProgressTarget(90);
+                setUploadProgressText('Upload selesai. Menyiapkan pembaruan data...');
+                updateSpreadsheetWithNewFile(fileUrl, fileName);
+            }
+
+            function showUploadCompletion(fileName, fileUrl) {
                 const uploadStep2 = document.getElementById('uploadStep2');
                 const uploadStep3 = document.getElementById('uploadStep3');
                 const uploadResult = document.getElementById('uploadResult');
-                const uploadResultFile = uploadResult.querySelector('.upload-result__file');
-                const uploadResultUrl = uploadResult.querySelector('.upload-result__url');
+                const uploadResultFile = uploadResult ? uploadResult.querySelector('.upload-result__file') : null;
+                const uploadResultUrl = uploadResult ? uploadResult.querySelector('.upload-result__url') : null;
                 const saveBtn = document.getElementById('saveUploadBtn');
+                const statusContainer = document.getElementById('uploadStatus');
 
-                // Hide step 2, show step 3
                 if (uploadStep2) uploadStep2.style.display = 'none';
                 if (uploadStep3) {
                     uploadStep3.style.display = 'block';
                     uploadStep3.classList.add('completed');
                 }
-
-                // Show file result
-                if (uploadResultFile) uploadResultFile.textContent = `✅ ${fileName}`;
+                if (statusContainer) statusContainer.style.display = 'none';
+                if (uploadResultFile) uploadResultFile.textContent = 'Nama file: ' + fileName;
                 if (uploadResultUrl) uploadResultUrl.textContent = fileUrl;
-
-                // Show finish button
                 if (saveBtn) saveBtn.style.display = 'inline-block';
-
-                // Update the spreadsheet with new URL
-                updateSpreadsheetWithNewFile(fileUrl);
             }
 
-            function updateSpreadsheetWithNewFile(fileUrl) {
-                console.log('Updating spreadsheet with URL:', fileUrl); // Debug log
+            function updateSpreadsheetWithNewFile(fileUrl, fileName) {
+                console.log('Updating spreadsheet with URL:', fileUrl);
 
                 if (currentRowIndex === null || currentUploadColumnIndex === null) {
                     console.error('Invalid data for update:', { currentRowIndex, currentUploadColumnIndex });
+                    setUploadStatus('updateSheet', 'error');
+                    stopUploadProgress('Data tidak valid untuk update');
                     showNotification('Data tidak valid untuk update.', 'error');
+                    const uploadButton = document.getElementById('uploadButton');
+                    if (uploadButton) {
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                `;
+                    }
                     return;
                 }
 
                 const updates = { [currentUploadColumnIndex]: fileUrl };
-                console.log('Spreadsheet updates:', updates); // Debug log
+                console.log('Spreadsheet updates:', updates);
 
                 if (!google || !google.script || !google.script.run) {
                     console.error('Google Apps Script not available');
+                    setUploadStatus('updateSheet', 'error');
+                    stopUploadProgress('Google Apps Script tidak tersedia');
                     showNotification('Google Apps Script tidak tersedia. URL: ' + fileUrl, 'error');
+                    const uploadButton = document.getElementById('uploadButton');
+                    if (uploadButton) {
+                        uploadButton.disabled = false;
+                        uploadButton.innerHTML = `
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                    </svg>
+                    Upload File
+                `;
+                    }
                     return;
                 }
 
                 google.script.run
                     .withSuccessHandler((updateResult) => {
-                        console.log('Spreadsheet update result:', updateResult); // Debug log
+                        console.log('Spreadsheet update result:', updateResult);
 
-                        // Update local data table
                         if (dataTable && currentRowDataIndex !== null) {
                             dataTable.setValue(currentRowDataIndex, currentUploadColumnIndex, fileUrl);
                         }
 
-                        // Update the "Lihat File" link
+                        setUploadStatus('updateSheet', 'completed');
+                        setUploadStatus('updateUi', 'active');
+                        setUploadProgressTarget(97);
+                        setUploadProgressText('Memperbarui tampilan nama file...');
+
                         updateViewFileLink(currentUploadColumnIndex, fileUrl);
+
+                        setUploadStatus('updateUi', 'completed');
+                        completeUploadProgress('Nama file berhasil diperbarui.');
+                        showUploadCompletion(fileName || (selectedFile ? selectedFile.name : 'File terbaru'), fileUrl);
 
                         const fieldName = headerMap[currentUploadColumnIndex] || `Kolom ${currentUploadColumnIndex + 1}`;
                         showNotification(`${fieldName} berhasil diupload dan tersimpan. Link "Lihat File" telah diperbarui.`, 'success');
 
-                        // Close upload modal after a short delay to show the updated link
                         setTimeout(() => {
                             finalizeUpload();
                         }, 2000);
                     })
                     .withFailureHandler((error) => {
                         console.error('Spreadsheet update error:', error);
+                        setUploadStatus('updateSheet', 'error');
+                        stopUploadProgress('Gagal memperbarui data spreadsheet');
+                        const uploadButton = document.getElementById('uploadButton');
+                        if (uploadButton) {
+                            uploadButton.disabled = false;
+                            uploadButton.innerHTML = `
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M9,16V10H5L12,3L19,10H15V16H9M5,20V18H19V20H5Z"/>
+                        </svg>
+                        Upload File
+                    `;
+                        }
                         showNotification('File berhasil diupload ke: ' + fileUrl + ' tapi gagal update database. Error: ' + error.message, 'error');
                     })
                     .updateRowFields(currentRowIndex, updates);
@@ -2708,3 +2946,4 @@
 </body>
 
 </html>
+
